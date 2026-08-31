@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monte seu Terço - Laços Encantus</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #fff, #ffe6f2);
+  min-height: 100vh;
+}
+
+header {
+  background: #fff;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid gold;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(212,175,55,0.12);
+}
+
+.logo { width: 80px; cursor: pointer; }
+.logo-fallback {
+  width: 80px; height: 80px;
+  display: none; margin: 0 auto;
+  background: gold; border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; color: #fff; cursor: pointer;
+}
+
+nav {
+  background: #ff4da6;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+}
+nav a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; }
+
+.page-title {
+  text-align: center;
+  padding: 28px 20px 10px;
+}
+.page-title h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #d4af37;
+  margin: 0 0 4px;
+  letter-spacing: 0.3px;
+}
+.page-title p {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+}
+
+.progress-wrap {
+  max-width: 520px;
+  margin: 16px auto 0;
+  padding: 0 20px;
+}
+.progress-bar {
+  height: 4px;
+  background: #fde;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff4da6, #d4af37);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-label {
+  font-size: 11px;
+  color: #bbb;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  margin: 16px auto 30px;
+  max-width: 520px;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+}
+
+.tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (max-width: 480px) {
+  .tipo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.secao-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 10px;
+  padding-top: 16px;
+  border-top: 1px solid #faf0f5;
+}
+.secao-header label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #444;
+  flex: 1;
+  letter-spacing: 0.3px;
+}
+.btn-voltar {
+  background: none;
+  border: 1.5px solid #ffb3d9;
+  color: #ff4da6;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  width: auto;
+  margin: 0;
+  transition: 0.2s;
+}
+.btn-voltar:hover { background: #fff0f7; }
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.option {
+  border: 2px solid #eee;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  padding: 10px;
+  transition: 0.2s;
+  font-size: 13px;
+  background: #fafafa;
+}
+.option:hover { transform: scale(1.02); border-color: #ffd966; background: #fffdf0; }
+
+.option-media {
+  width: 100%;
+  height: 90px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff5fb, #fffbe8);
+  font-size: 38px;
+}
+.option-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.option.selected { border: 2px solid #d4af37; background: #fffbeb; }
+
+.tipo-card {
+  border: 2px solid #eee;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  padding: 12px 6px;
+  transition: 0.2s;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  background: #fafafa;
+}
+.tipo-card:hover { transform: scale(1.03); border-color: #ffd966; background: #fffbeb; }
+.tipo-card.selected { border: 2px solid #d4af37; background: #fffbeb; color: #b8860b; }
+.tipo-card .icone { font-size: 24px; margin-bottom: 5px; }
+
+.price {
+  color: #ff4da6;
+  font-weight: 600;
+  font-size: 12px;
+  display: block;
+  margin-top: 3px;
+}
+
+.total-box {
+  margin-top: 18px;
+  background: linear-gradient(135deg, #fff9f0, #fff0f8);
+  border: 1.5px solid #ffd6e7;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.total-label {
+  font-size: 13px;
+  color: #999;
+  font-weight: 400;
+}
+.total-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #d4af37;
+}
+
+.btn-principal {
+  width: 100%;
+  padding: 14px;
+  margin-top: 14px;
+  background: linear-gradient(135deg, #d4af37, #f0d060);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  color: #1a1a1a;
+  transition: 0.2s;
+  box-shadow: 0 4px 14px rgba(212,175,55,0.3);
+  letter-spacing: 0.2px;
+}
+.btn-principal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212,175,55,0.4);
+}
+.btn-principal:active { transform: translateY(0); }
+
+/* ── ANIMAÇÃO DE ENTRADA DAS SEÇÕES ── */
+.secao-reveal {
+  animation: secaoEntrar 0.35s ease both;
+}
+@keyframes secaoEntrar {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#popup-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+#popup-overlay.ativo { display: flex; }
+
+#popup-caixa {
+  background: #fff;
+  border-radius: 22px;
+  padding: 32px 28px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 12px 50px rgba(0,0,0,0.18);
+  animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.popup-icone { font-size: 52px; line-height: 1; margin-bottom: 14px; }
+
+#popup-caixa h3 { margin: 0 0 8px; color: #222; font-size: 18px; font-weight: 600; }
+#popup-caixa p  { margin: 0 0 22px; color: #888; font-size: 13px; line-height: 1.6; }
+
+.popup-botoes { display: flex; flex-direction: column; gap: 10px; }
+
+.popup-btn-carrinho {
+  background: #ff4da6; color: white;
+  border: none; border-radius: 12px;
+  padding: 13px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: 14px;
+  cursor: pointer; transition: 0.2s;
+}
+.popup-btn-carrinho:hover { background: #e6008c; }
+
+.popup-btn-continuar {
+  background: none;
+  border: 1.5px solid #eee;
+  border-radius: 12px; padding: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px; color: #999;
+  cursor: pointer; transition: 0.2s;
+}
+.popup-btn-continuar:hover { border-color: #ccc; color: #666; }
+
+#popup-erro-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+#popup-erro-overlay.ativo { display: flex; }
+
+#popup-erro-caixa {
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px 22px;
+  max-width: 290px; width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  animation: popIn 0.2s ease;
+}
+#popup-erro-caixa h3 { margin: 0 0 6px; color: #e63946; font-size: 16px; }
+#popup-erro-caixa p  { margin: 0 0 16px; color: #777; font-size: 13px; line-height: 1.5; }
+
+.popup-btn-fechar {
+  background: #f8f8f8;
+  border: 1.5px solid #eee;
+  border-radius: 10px; padding: 10px 22px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px; cursor: pointer; color: #666;
+  transition: 0.2s;
+}
+.popup-btn-fechar:hover { background: #f0f0f0; }
+
+.campo-texto {
+  margin-top: 10px;
+}
+.campo-texto label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 5px;
+}
+.campo-texto input,
+.campo-texto textarea,
+.campo-texto select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #eee;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: 0.2s;
+  background: #fafafa;
+  color: #333;
+}
+.campo-texto input:focus,
+.campo-texto textarea:focus,
+.campo-texto select:focus { border-color: #ff4da6; background: #fff; }
+.campo-texto textarea { resize: vertical; min-height: 64px; }
+
+.formato-opcoes {
+  display: flex;
+  gap: 18px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.formato-opcoes label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+.formato-opcoes input[type="radio"] {
+  width: auto;
+  accent-color: #ff4da6;
+}
+
+.campo-upload {
+  margin-top: 10px;
+}
+.campo-upload label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 5px;
+}
+.campo-upload input[type="file"] {
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: #999;
+}
+
+.secao-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #444;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.option-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.option-grid-1 .option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 14px 16px;
+}
+.option-grid-1 .option .option-media {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  margin-bottom: 0;
+  font-size: 26px;
+  border-radius: 10px;
+}
+
+.nomes-info {
+  background: #fffbe8;
+  border: 1px solid #ffd966;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #b8860b;
+  margin-bottom: 8px;
+  line-height: 1.7;
+}
+.nomes-info strong { color: #8b6914; }
+
+.nome-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.nome-row input {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #eee;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: 0.2s;
+  background: #fafafa;
+  color: #333;
+}
+.nome-row input:focus { border-color: #ff4da6; background: #fff; }
+.nome-row .nome-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  min-width: 56px;
+  text-align: center;
+}
+.nome-badge.gratis { background: #e8f8e8; color: #2d8a2d; }
+.nome-badge.pago   { background: #fff0f5; color: #e63946; }
+
+.btn-add-nome {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  background: none;
+  border: 1.5px dashed #ffb3d9;
+  color: #ff4da6;
+  border-radius: 9px;
+  padding: 6px 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-add-nome:hover { background: #fff0f7; border-color: #ff4da6; }
+.btn-add-nome:disabled { opacity: 0.4; cursor: default; }
+
+.btn-rem-nome {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: 0.2s;
+}
+.btn-rem-nome:hover { color: #e63946; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <img
+    src="logo.png" class="logo" alt="Logo"
+    onclick="irInicio()"
+    onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='flex';"
+  >
+  <div class="logo-fallback" onclick="irInicio()">Laços</div>
+</header>
+
+<nav>
+  <a href="index.html">Início</a>
+  <a href="terco.html">Montar</a>
+  <a href="produtos.html">Produtos</a>
+  <a href="carrinho.html">🛒 Carrinho</a>
+</nav>
+
+<div class="page-title">
+  <h2>Monte o Seu Terço</h2>
+  <p>Personalize cada detalhe com amor e fé</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <div class="progress-label" id="progress-label">Escolha o tipo para começar</div>
+</div>
+
+<div class="box">
+
+  <!-- TIPO -->
+  <span class="secao-label">Escolha o Tipo</span>
+  <div class="tipo-grid" id="tipo-grid">
+    <div class="tipo-card" onclick="selectTipo('pulso', this)">
+      <div class="icone">💗</div>Pulso
+    </div>
+    <div class="tipo-card" onclick="selectTipo('tradicional', this)">
+      <div class="icone">🙏</div>Personalizados
+    </div>
+    <div class="tipo-card" onclick="selectTipo('chaveiro', this)">
+      <div class="icone">🔑</div>Chaveiro
+    </div>
+    <div class="tipo-card" onclick="selectTipo('veiculo', this)">
+      <div class="icone">🚗</div>Veículo
+    </div>
+    <div class="tipo-card" onclick="selectTipo('noiva', this)">
+      <div class="icone">💍</div>Noiva
+    </div>
+    <div class="tipo-card" onclick="selectTipo('luxo', this)">
+      <div class="icone">✨</div>Luxo
+    </div>
+    <div class="tipo-card" onclick="selectTipo('infantil', this)">
+      <div class="icone">🧸</div>Infantil
+    </div>
+    <div class="tipo-card" onclick="selectTipo('embalagem', this)">
+      <div class="icone">🎁</div>Embalagem
+    </div>
+  </div>
+
+  <!-- CATEGORIAS -->
+  <div id="categorias-area" style="display:none;">
+    <div class="secao-header">
+      <label id="label-categoria">Categoria</label>
+      <button class="btn-voltar" onclick="voltar('categorias')">← Voltar</button>
+    </div>
+    <div id="categorias" class="option-grid"></div>
+  </div>
+
+  <!-- MODELOS -->
+  <div id="modelos-area" style="display:none;">
+    <div class="secao-header">
+      <label id="label-modelo">Modelo</label>
+      <button class="btn-voltar" onclick="voltar('modelos')">← Voltar</button>
+    </div>
+    <div id="modelos" class="option-grid"></div>
+  </div>
+
+  <!-- CORES -->
+  <div id="cores-area" style="display:none;">
+    <div class="secao-header">
+      <label id="label-cor">Cor</label>
+      <button class="btn-voltar" onclick="voltar('cores')">← Voltar</button>
+    </div>
+    <div id="cores" class="option-grid"></div>
+  </div>
+
+  <!-- MISTÉRIOS -->
+  <div id="misterios-area" style="display:none;">
+    <div class="secao-header">
+      <label id="label-misterio">Mistério</label>
+      <button class="btn-voltar" onclick="voltar('misterios')">← Voltar</button>
+    </div>
+    <div id="misterios" class="option-grid"></div>
+  </div>
+
+  <!-- FOTO (Noiva) -->
+  <div id="foto-area" style="display:none;">
+    <div class="secao-header">
+      <label>Com foto ou Sem foto?</label>
+      <button class="btn-voltar" onclick="voltar('foto')">← Voltar</button>
+    </div>
+    <div id="foto-opcoes" class="option-grid-1"></div>
+  </div>
+
+  <!-- FORMA DE MONTAR (Noiva) -->
+  <div id="montagem-area" style="display:none;">
+    <div class="secao-header">
+      <label>Forma de montar</label>
+      <button class="btn-voltar" onclick="voltar('montagem')">← Voltar</button>
+    </div>
+    <div id="montagem-opcoes" class="option-grid-1"></div>
+  </div>
+
+  <!-- PERSONALIZAÇÃO -->
+  <div id="personalizacao-area" style="display:none;">
+    <div class="secao-header">
+      <label>Personalização</label>
+    </div>
+    <div id="personalizacao-conteudo"></div>
+  </div>
+
+  <div class="total-box">
+    <span class="total-label">Total do pedido</span>
+    <span class="total-value">R$ <span id="total">0,00</span></span>
+  </div>
+
+  <button class="btn-principal" onclick="finalizar()">🛒 Adicionar ao Carrinho</button>
+
+</div>
+
+<!-- Popup sucesso -->
+<div id="popup-overlay">
+  <div id="popup-caixa">
+    <div class="popup-icone">✅</div>
+    <h3>Adicionado com sucesso!</h3>
+    <p>Seu produto foi adicionado ao carrinho. Deseja continuar montando ou ir ao carrinho?</p>
+    <div class="popup-botoes">
+      <button class="popup-btn-carrinho" onclick="irCarrinho()">🛒 Ir ao Carrinho</button>
+      <button class="popup-btn-continuar" onclick="fecharPopup()">Continuar montando</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup erro -->
+<div id="popup-erro-overlay">
+  <div id="popup-erro-caixa">
+    <div class="popup-icone">⚠️</div>
+    <h3 id="popup-erro-titulo">Atenção</h3>
+    <p id="popup-erro-msg">Preencha todos os campos.</p>
+    <button class="popup-btn-fechar" onclick="fecharPopupErro()">Entendi</button>
+  </div>
+</div>
+
+<script>
+
+/* =============================================
+   SCROLL HELPER
+   ============================================= */
+function revelarSecao(idOuEl) {
+  const el = typeof idOuEl === 'string' ? document.getElementById(idOuEl) : idOuEl;
+  if (!el) return;
+
+  el.classList.remove('secao-reveal');
+  void el.offsetWidth;
+  el.classList.add('secao-reveal');
+
+  setTimeout(() => {
+    const headerH = document.querySelector('header')?.offsetHeight || 60;
+    const navH    = document.querySelector('nav')?.offsetHeight    || 44;
+    const offset  = headerH + navH + 12;
+    const top     = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }, 30);
+}
+
+/* =============================================
+   ESTADO GLOBAL
+   ============================================= */
+let selecao = {
+  tipo:'', categoria:'', modelo:'',
+  corBase:'', cor:'', misterioCat:'', misterio:'',
+  comFoto: '', formaMontagem: '',
+  personalizacao: {}
+};
+let precoModelo = 0, precoCor = 0, precoMisterio = 0, precoNomes = 0;
+
+/* =============================================
+   UTILITÁRIOS
+   ============================================= */
+function recalcularTotal() {
+  const t = precoModelo + precoCor + precoMisterio + precoNomes;
+  document.getElementById('total').textContent = t.toFixed(2).replace('.', ',');
+  atualizarProgresso();
+}
+
+function calcularPrecoNomes(nomes) {
+  const qtd = nomes.filter(n => n.trim() !== '').length;
+  const extras = Math.max(0, qtd - 2);
+  return extras;
+}
+
+function atualizarProgresso() {
+  let passo = 0;
+  if (selecao.tipo) passo++;
+  if (selecao.categoria || selecao.tipo === 'embalagem') passo++;
+  if (selecao.modelo) passo++;
+  if (selecao.cor || tiposSemCorMisterio.includes(selecao.tipo) || selecao.tipo === 'noiva') passo++;
+  if (selecao.misterio || tiposSemCorMisterio.includes(selecao.tipo) || tiposSemMisterio.includes(selecao.tipo) || selecao.formaMontagem) passo++;
+
+  const pct = Math.round((passo / 5) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const labels = [
+    'Escolha o tipo para começar',
+    'Categoria selecionada ✓',
+    'Modelo selecionado ✓',
+    'Cor selecionada ✓',
+    'Quase pronto! ✓',
+    'Pronto para adicionar! ✨'
+  ];
+  document.getElementById('progress-label').textContent = labels[Math.min(passo, 5)];
+}
+
+function gerarItens(prefixo, quantidade, preco, emoji = '📿') {
+  const lista = [];
+  for (let i = 1; i <= quantidade; i++) {
+    lista.push({ nome: `${prefixo} ${i}`, preco: preco, img: null, emoji: emoji });
+  }
+  return lista;
+}
+
+function marcarSelecionado(el) {
+  el.parentElement.querySelectorAll('.option, .tipo-card').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function irInicio()   { window.location.href = 'index.html'; }
+function irCarrinho() { window.location.href = 'carrinho.html'; }
+
+function renderMedia(item) {
+  if (item.img) {
+    return `
+      <div class="option-media">
+        <img src="${item.img}" alt="${item.nome}"
+          onerror="this.parentElement.innerHTML='<span>${item.emoji || '📿'}</span>'">
+      </div>`;
+  }
+  return `<div class="option-media">${item.emoji || '📿'}</div>`;
+}
+
+/* =============================================
+   COMPONENTE DE NOMES DINÂMICO
+   ============================================= */
+function renderNomesBloco(nomesArray) {
+  const maxNomes = 5;
+  let html = `
+    <div class="nomes-info">
+      <strong>💡 Personalização com nomes:</strong><br>
+      ✅ 1º nome — <strong>Grátis</strong><br>
+      ✅ 2º nome — <strong>Grátis</strong><br>
+      💰 3º ao 5º nome — <strong>R$ 1,00 cada</strong><br>
+      ⚠️ Nome composto (ex: Maria Eduarda) conta como <strong>2 nomes</strong>
+    </div>
+    <div id="nomes-lista">`;
+
+  nomesArray.forEach((nome, i) => {
+    const gratis = i < 2;
+    const badge = gratis
+      ? `<span class="nome-badge gratis">Grátis</span>`
+      : `<span class="nome-badge pago">R$ 1,00</span>`;
+    const remBtn = i > 0
+      ? `<button class="btn-rem-nome" onclick="removerNome(${i})" title="Remover">×</button>`
+      : '';
+    html += `
+      <div class="nome-row" id="nome-row-${i}">
+        <input type="text" placeholder="Nome ${i + 1}" value="${nome}"
+          oninput="atualizarNome(${i}, this.value)">
+        ${badge}
+        ${remBtn}
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  if (nomesArray.length < maxNomes) {
+    const proxIdx = nomesArray.length;
+    const proxPreco = proxIdx >= 2 ? ' (R$ 1,00)' : ' (Grátis)';
+    html += `<button class="btn-add-nome" onclick="adicionarNome()">+ Adicionar nome ${proxIdx + 1}${proxPreco}</button>`;
+  }
+
+  return html;
+}
+
+function adicionarNome() {
+  if (!selecao.personalizacao.nomes) selecao.personalizacao.nomes = [''];
+  if (selecao.personalizacao.nomes.length >= 5) return;
+  selecao.personalizacao.nomes.push('');
+  atualizarNomesPreco();
+  rerenderNomes();
+}
+
+function removerNome(idx) {
+  if (!selecao.personalizacao.nomes) return;
+  selecao.personalizacao.nomes.splice(idx, 1);
+  atualizarNomesPreco();
+  rerenderNomes();
+}
+
+function atualizarNome(idx, valor) {
+  if (!selecao.personalizacao.nomes) selecao.personalizacao.nomes = [];
+  selecao.personalizacao.nomes[idx] = valor;
+  atualizarNomesPreco();
+  recalcularTotal();
+}
+
+function atualizarNomesPreco() {
+  const nomes = selecao.personalizacao.nomes || [];
+  precoNomes = calcularPrecoNomes(nomes);
+  recalcularTotal();
+}
+
+function rerenderNomes() {
+  const container = document.getElementById('nomes-dinamicos');
+  if (!container) return;
+  if (!selecao.personalizacao.nomes) selecao.personalizacao.nomes = [''];
+  container.innerHTML = renderNomesBloco(selecao.personalizacao.nomes);
+}
+
+/* =============================================
+   BANCO DE DADOS DE PRODUTOS
+   ============================================= */
+const categoriasTradicional = {
+  "Nossa Senhora Aparecida":  gerarItens("Nossa Sra. Aparecida", 15, 40, '🕊️'),
+  "Nossa Senhora das Graças": gerarItens("Nossa Sra. das Graças", 10, 40, '💙'),
+  "Guadalupe":                gerarItens("Guadalupe", 5, 40, '🌹'),
+  "Santa Rita de Cássia":     gerarItens("Sta. Rita de Cássia", 5, 40, '🌸'),
+  "Santa Terezinha":          gerarItens("Santa Terezinha", 5, 40, '🌺'),
+  "Sagrada Família":          gerarItens("Sagrada Família", 5, 40, '👨‍👩‍👦'),
+  "Nossa Senhora de Fátima":  gerarItens("Fátima", 5, 40, '⭐'),
+  "São José":                 gerarItens("São José", 5, 40, '🛠️'),
+  "Espírito Santo":           gerarItens("Espírito Santo", 5, 40, '🕊️'),
+  "Jesus":                    gerarItens("Jesus", 5, 40, '✝️'),
+  "Carlos Acutis":            gerarItens("Carlos Acutis", 5, 40, '💻'),
+  "São Miguel":               gerarItens("São Miguel", 5, 40, '⚔️'),
+  "Santo Antônio":            gerarItens("Santo Antônio", 5, 40, '🙏'),
+  "Santa Luzia":              gerarItens("Santa Luzia", 5, 40, '👁️'),
+  "Foto Personalizada":       gerarItens("Foto Personalizada", 8, 40, '📸')
+};
+
+const categoriasLuxo = {
+  "Linha de Luxo": [
+    { nome: "Relicário Dourado",       preco: 120, img: null, emoji: '🥇' },
+    { nome: "Relicário Prata",         preco: 110, img: null, emoji: '🥈' },
+    { nome: "Relicário Ouro Velho",    preco: 115, img: null, emoji: '🏆' },
+    { nome: "Relicário P Ouro",        preco: 100, img: null, emoji: '💛' },
+    { nome: "Relicário P Prata",       preco: 95,  img: null, emoji: '🪙' },
+    { nome: "Relicário P Ouro Velho",  preco: 105, img: null, emoji: '✨' }
+  ],
+  "Nossa Senhora Aparecida": gerarItens("Nossa Sra. Aparecida", 20, 110, '🕊️'),
+  "Nossa Senhora das Graças": gerarItens("Nossa Sra. das Graças", 15, 110, '💙'),
+  "Sagrada Família":          gerarItens("Sagrada Família", 8, 110, '👨‍👩‍👦'),
+  "Profissões": [
+    { nome: "Biomedicina",         preco: 110, img: null, emoji: '🔬' },
+    { nome: "Agronomia",           preco: 110, img: null, emoji: '🌾' },
+    { nome: "Catequista",          preco: 110, img: null, emoji: '✝️' },
+    { nome: "Pedagogia",           preco: 110, img: null, emoji: '📚' },
+    { nome: "Medicina",            preco: 110, img: null, emoji: '🩺' },
+    { nome: "Enfermagem",          preco: 110, img: null, emoji: '💊' },
+    { nome: "Tec. de Enfermagem",  preco: 110, img: null, emoji: '🏥' },
+    { nome: "Psicologia",          preco: 110, img: null, emoji: '🧠' },
+    { nome: "Fisioterapia",        preco: 110, img: null, emoji: '🦾' },
+    { nome: "Administração",       preco: 110, img: null, emoji: '📊' },
+    { nome: "Direito",             preco: 110, img: null, emoji: '⚖️' },
+    { nome: "Nutrição",            preco: 110, img: null, emoji: '🥗' },
+    { nome: "Veterinário",         preco: 110, img: null, emoji: '🐾' },
+    { nome: "Odontologia",         preco: 110, img: null, emoji: '🦷' },
+    { nome: "Farmácia",            preco: 110, img: null, emoji: '💉' }
+  ]
+};
+
+function gerarModelosMaterial(prefixo, preco, emoji) {
+  return ['Dourado', 'Prata', 'Ouro Velho'].map(mat => ({
+    nome: `${prefixo} ${mat}`, preco: preco, img: null, emoji: emoji
+  }));
+}
+
+const bancoModelos = {
+  pulso: {
+    "São Bento":                gerarModelosMaterial("São Bento Pulso", 35, '✝️'),
+    "Nossa Senhora Aparecida":  gerarModelosMaterial("Aparecida Pulso", 35, '🕊️'),
+    "Nossa Senhora das Graças": gerarModelosMaterial("Graças Pulso", 35, '💙')
+  },
+  tradicional: categoriasTradicional,
+  // Chaveiro usa o mesmo catálogo de Personalizados (idêntico), só sem a etapa de mistério
+  chaveiro: categoriasTradicional,
+  veiculo: categoriasTradicional,
+  noiva: {
+    "Prata":   gerarItens("Noiva Prata", 20, 65, '🪙'),
+    "Dourado": gerarItens("Noiva Dourado", 20, 70, '💛')
+  },
+  luxo: categoriasLuxo,
+  infantil: {
+    "Emborrachado": gerarItens("Infantil Emborrachado", 5, 30, '🧸'),
+    "Metal":        gerarItens("Infantil Metal", 3, 35, '⚙️'),
+    "Biscuit":      gerarItens("Infantil Biscuit", 5, 32, '🎨')
+  },
+  // ── PREÇOS ATUALIZADOS ──
+  embalagem: {
+    "Caixa PP (mini chaveiros)":      [{ nome: "Caixa PP (mini chaveiros)",      preco: 5,  img: null, emoji: '📦' }],
+    "Caixa P (pulseiras/chaveiros)":  [{ nome: "Caixa P (pulseiras/chaveiros)",  preco: 7,  img: null, emoji: '📦' }],
+    "Caixa M (terços simples)":       [{ nome: "Caixa M (terços simples)",       preco: 10, img: null, emoji: '🎁' }],
+    "Caixa G (terços de luxo)":       [{ nome: "Caixa G (terços de luxo)",       preco: 14, img: null, emoji: '🎁' }]
+  }
+};
+
+const coresNoiva = {
+  "Branco Perolado": [{ nome: "Branco Perolado", preco: 0, img: null, emoji: '🤍' }],
+  "Perolado":        [{ nome: "Perolado",        preco: 0, img: null, emoji: '🪞' }],
+  "Transparente":    [{ nome: "Transparente",    preco: 0, img: null, emoji: '💎' }]
+};
+
+// Vocabulário de acabamentos usado para nomear as opções de cor em todo o site
+const ESTILOS_PULSO     = ['Leitoso', 'Perolado', 'Cristal'];
+const ESTILOS_PADRAO_6  = ['Cintilante', 'Fosco', 'Perolado', 'Leitoso', 'Cristal Facetado de Vidro', 'Granulado'];
+const ESTILOS_INFANTIL  = ['Fosco', 'Leitoso', 'Cintilante', 'Perolado'];
+
+const CORES_BASE = [
+  { nome: 'Preto',    emoji: '🖤' },
+  { nome: 'Azul',     emoji: '💙' },
+  { nome: 'Amarelo',  emoji: '💛' },
+  { nome: 'Laranja',  emoji: '🧡' },
+  { nome: 'Rosa',     emoji: '🩷' },
+  { nome: 'Branco',   emoji: '🤍' },
+  { nome: 'Vermelho', emoji: '❤️' },
+  { nome: 'Roxo',     emoji: '💜' },
+  { nome: 'Verde',    emoji: '💚' }
+];
+
+function gerarCoresEstilo(corNome, estilos, preco, emoji) {
+  return estilos.map(estilo => ({ nome: `${corNome} ${estilo}`, preco: preco, img: null, emoji: emoji }));
+}
+
+// Pulso: todas as cores, com apenas 3 opções (Leitoso / Perolado / Cristal)
+const coresPulso = {};
+CORES_BASE.forEach(c => { coresPulso[c.nome] = gerarCoresEstilo(c.nome, ESTILOS_PULSO, 8, c.emoji); });
+
+// Personalizados / Chaveiro / Veículo: todas as cores, com 6 opções cada
+const coresDisponiveis = {};
+CORES_BASE.forEach(c => { coresDisponiveis[c.nome] = gerarCoresEstilo(c.nome, ESTILOS_PADRAO_6, 8, c.emoji); });
+
+const coresLuxo = {
+  "Cristais": [
+    { nome: "Cristal Transparente", preco: 15, img: null, emoji: '💎' },
+    { nome: "Cristal Rosa",         preco: 15, img: null, emoji: '🩷' },
+    { nome: "Cristal Azul",         preco: 15, img: null, emoji: '💙' },
+    { nome: "Cristal Roxo",         preco: 15, img: null, emoji: '💜' },
+    { nome: "Cristal Verde",        preco: 15, img: null, emoji: '💚' },
+    { nome: "Cristal Champagne",    preco: 15, img: null, emoji: '🥂' },
+    { nome: "Cristal Vermelho",     preco: 15, img: null, emoji: '❤️' },
+    { nome: "Cristal Âmbar",        preco: 15, img: null, emoji: '🟠' }
+  ],
+  "Preto":    gerarCoresEstilo('Preto Luxo', ESTILOS_PADRAO_6, 8, '🖤'),
+  "Azul":     gerarCoresEstilo('Azul Luxo', ESTILOS_PADRAO_6, 8, '💙'),
+  "Amarelo":  gerarCoresEstilo('Amarelo Luxo', ESTILOS_PADRAO_6, 8, '💛'),
+  "Laranja":  gerarCoresEstilo('Laranja Luxo', ESTILOS_PADRAO_6, 8, '🧡'),
+  "Rosa":     gerarCoresEstilo('Rosa Luxo', ESTILOS_PADRAO_6, 8, '🩷'),
+  "Branco":   gerarCoresEstilo('Branco Luxo', ESTILOS_PADRAO_6, 8, '🤍'),
+  "Vermelho": gerarCoresEstilo('Vermelho Luxo', ESTILOS_PADRAO_6, 8, '❤️'),
+  "Roxo":     gerarCoresEstilo('Roxo Luxo', ESTILOS_PADRAO_6, 8, '💜'),
+  "Verde":    gerarCoresEstilo('Verde Luxo', ESTILOS_PADRAO_6, 8, '💚')
+};
+
+const CORES_INFANTIL_BASE = [
+  { nome: 'Rosa',         emoji: '🩷' },
+  { nome: 'Azul Bebê',    emoji: '🩵' },
+  { nome: 'Amarelo',      emoji: '💛' },
+  { nome: 'Lilás',        emoji: '💜' },
+  { nome: 'Verde',        emoji: '💚' },
+  { nome: 'Branco',       emoji: '🤍' },
+  { nome: 'Transparente', emoji: '💎' }
+];
+const coresInfantil = {};
+CORES_INFANTIL_BASE.forEach(c => { coresInfantil[c.nome] = gerarCoresEstilo(c.nome, ESTILOS_INFANTIL, 8, c.emoji); });
+
+const coresPorTipo = {
+  pulso:    coresPulso,
+  noiva:    coresNoiva,
+  luxo:     coresLuxo,
+  infantil: coresInfantil
+};
+
+const bancoMisteriosPorTipo = {
+  default: {
+    "Granulados": gerarItens("Granulado", 5, 12, '⚪'),
+    "Variados":   gerarItens("Variado", 5, 12, '🔮'),
+    "Flores":     gerarItens("Flores", 5, 14, '🌸'),
+    "Perolados":  gerarItens("Perolado", 5, 14, '🪞'),
+    "Metais":     gerarItens("Metal", 5, 14, '⚙️')
+  },
+  luxo: {
+    "Granulados": gerarItens("Granulado Luxo", 6, 12, '⚪'),
+    "Variados":   gerarItens("Variado Luxo", 6, 12, '🔮'),
+    "Flores":     gerarItens("Flores Luxo", 6, 14, '🌸'),
+    "Perolados":  gerarItens("Perolado Luxo", 6, 14, '🪞')
+  },
+  infantil: {
+    "Granulados": gerarItens("Granulado Infantil", 6, 12, '⚪'),
+    "Variados":   gerarItens("Variado Infantil", 6, 12, '🔮'),
+    "Flores":     gerarItens("Flores Infantil", 6, 14, '🌸'),
+    "Perolados":  gerarItens("Perolado Infantil", 6, 14, '🪞')
+  }
+};
+
+const tiposSemCorMisterio = ['embalagem'];
+// Pulso, Chaveiro e Veículo mantêm a etapa de cor, mas não têm etapa de mistério
+const tiposSemMisterio = ['pulso', 'chaveiro', 'veiculo'];
+
+const luxoCatsComFoto = ['Linha de Luxo', 'Nossa Senhora Aparecida', 'Nossa Senhora das Graças', 'Sagrada Família', 'Profissões'];
+
+/* =============================================
+   FLUXO DE SELEÇÃO
+   ============================================= */
+function resetarFluxo() {
+  const tipoSalvo = selecao.tipo;
+  selecao = {
+    tipo: tipoSalvo, categoria:'', modelo:'',
+    corBase:'', cor:'', misterioCat:'', misterio:'',
+    comFoto: '', formaMontagem: '',
+    personalizacao: { nomes: [''] }
+  };
+  precoModelo = precoCor = precoMisterio = precoNomes = 0;
+  recalcularTotal();
+  ['modelos-area','cores-area','misterios-area','foto-area','montagem-area','personalizacao-area'].forEach(id =>
+    document.getElementById(id).style.display = 'none'
+  );
+}
+
+function voltar(etapa) {
+  if (etapa === 'categorias') {
+    ['categorias-area','modelos-area','cores-area','misterios-area','foto-area','montagem-area','personalizacao-area'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+    selecao = { tipo:'', categoria:'', modelo:'', corBase:'', cor:'', misterioCat:'', misterio:'', comFoto:'', formaMontagem:'', personalizacao:{ nomes: [''] } };
+    precoModelo = precoCor = precoMisterio = precoNomes = 0;
+    document.querySelectorAll('.option, .tipo-card').forEach(o => o.classList.remove('selected'));
+    revelarSecao('tipo-grid');
+
+  } else if (etapa === 'modelos') {
+    ['modelos-area','cores-area','misterios-area','foto-area','montagem-area','personalizacao-area'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+    selecao.modelo = selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = '';
+    selecao.personalizacao = { nomes: [''] };
+    precoModelo = precoCor = precoMisterio = precoNomes = 0;
+    revelarSecao('categorias-area');
+
+  } else if (etapa === 'cores') {
+    ['cores-area','misterios-area','foto-area','montagem-area','personalizacao-area'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+    selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = '';
+    precoCor = precoMisterio = 0;
+    revelarSecao('modelos-area');
+
+  } else if (etapa === 'misterios') {
+    ['misterios-area','foto-area','montagem-area','personalizacao-area'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+    selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = '';
+    precoMisterio = 0;
+    revelarSecao('cores-area');
+
+  } else if (etapa === 'foto') {
+    ['foto-area','montagem-area','personalizacao-area'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+    selecao.comFoto = selecao.formaMontagem = '';
+    revelarSecao('cores-area');
+
+  } else if (etapa === 'montagem') {
+    ['montagem-area','personalizacao-area'].forEach(id =>
+      document.getElementById(id).style.display = 'none'
+    );
+    selecao.formaMontagem = '';
+    revelarSecao('foto-area');
+  }
+  recalcularTotal();
+}
+
+function selectTipo(valor, el) {
+  selecao.tipo = valor;
+  resetarFluxo();
+
+  document.querySelectorAll('.tipo-card').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const banco = bancoModelos[valor];
+  let html = '';
+  Object.keys(banco).forEach(cat => {
+    const item = banco[cat][0];
+    const preco = item ? item.preco : 0;
+    const precoLabel = (valor === 'embalagem' && preco > 0)
+      ? `<span class="price">R$ ${preco},00</span>`
+      : '';
+    html += `<div class="option" data-tipo="${valor}" data-cat="${cat}" onclick="selectCategoria(this)">
+      <div class="option-media">${item ? (item.emoji || '📿') : '📿'}</div>
+      ${cat}${precoLabel}
+    </div>`;
+  });
+  document.getElementById('categorias').innerHTML = html;
+
+  const labels = {
+    embalagem:   'Tamanho da Embalagem',
+    noiva:       'Linha da Noiva',
+    luxo:        'Linha de Luxo',
+    infantil:    'Material',
+    chaveiro:    'Tipo de Chaveiro',
+    veiculo:     'Padroeiro do Veículo',
+    tradicional: 'Padroeiro / Tema',
+    pulso:       'Padroeiro / Tema'
+  };
+  document.getElementById('label-categoria').textContent = labels[valor] || 'Categoria';
+
+  const areaEl = document.getElementById('categorias-area');
+  areaEl.style.display = 'block';
+  revelarSecao(areaEl);
+}
+
+function selectCategoria(el) {
+  const tipo = el.dataset.tipo, cat = el.dataset.cat;
+  selecao.categoria = cat;
+  selecao.modelo = selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = '';
+  selecao.personalizacao = { nomes: [''] };
+  precoModelo = precoCor = precoMisterio = precoNomes = 0;
+  recalcularTotal();
+  ['modelos-area','cores-area','misterios-area','foto-area','montagem-area'].forEach(id =>
+    document.getElementById(id).style.display = 'none'
+  );
+  marcarSelecionado(el);
+
+  if (tipo === 'embalagem') {
+    selecao.modelo = bancoModelos.embalagem[cat][0].nome;
+    precoModelo = bancoModelos.embalagem[cat][0].preco;
+    recalcularTotal();
+    mostrarPersonalizacao(tipo);
+    return;
+  }
+
+  let html = '';
+  bancoModelos[tipo][cat].forEach(m => {
+    html += `
+      <div class="option" data-nome="${m.nome}" data-preco="${m.preco}" onclick="selectModelo(this)">
+        ${renderMedia(m)}
+        <span>${m.nome}</span>
+        ${m.preco > 0 ? `<span class="price">R$ ${m.preco},00</span>` : ''}
+      </div>`;
+  });
+  document.getElementById('modelos').innerHTML = html;
+
+  const labelsModelo = {
+    noiva:       'Modelo da Noiva',
+    luxo:        'Modelo',
+    infantil:    'Modelo Infantil',
+    chaveiro:    'Modelo do Chaveiro',
+    veiculo:     'Modelo do Veículo',
+    tradicional: 'Modelo',
+    pulso:       'Modelo'
+  };
+  document.getElementById('label-modelo').textContent = labelsModelo[tipo] || 'Modelo';
+
+  const modelosEl = document.getElementById('modelos-area');
+  modelosEl.style.display = 'block';
+  revelarSecao(modelosEl);
+}
+
+function selectModelo(el) {
+  selecao.modelo = el.dataset.nome;
+  precoModelo    = Number(el.dataset.preco);
+  selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = '';
+  precoCor = precoMisterio = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+
+  const tipo = selecao.tipo;
+
+  if (tiposSemCorMisterio.includes(tipo)) {
+    document.getElementById('cores-area').style.display = 'none';
+    document.getElementById('misterios-area').style.display = 'none';
+    mostrarPersonalizacao(tipo);
+    return;
+  }
+
+  if (tipo === 'noiva') {
+    const cores = coresNoiva;
+    let html = '';
+    Object.keys(cores).forEach(cor => {
+      html += `<div class="option" data-cor="${cor}" data-preco="0" onclick="selectCorNoivaFinal(this)">
+        <div class="option-media" style="font-size:28px">${cores[cor][0]?.emoji || '🎨'}</div>
+        ${cor}
+      </div>`;
+    });
+    document.getElementById('cores').innerHTML = html;
+    document.getElementById('label-cor').textContent = 'Cor das Contas';
+
+    const coresEl = document.getElementById('cores-area');
+    coresEl.style.display = 'block';
+    document.getElementById('misterios-area').style.display = 'none';
+    document.getElementById('foto-area').style.display = 'none';
+    document.getElementById('montagem-area').style.display = 'none';
+    revelarSecao(coresEl);
+    return;
+  }
+
+  if (tipo === 'luxo') {
+    const cores = coresLuxo;
+    let html = '';
+    Object.keys(cores).forEach(cor => {
+      const item = cores[cor][0];
+      html += `<div class="option" data-cor="${cor}" onclick="selectCorLuxo(this)">
+        <div class="option-media" style="font-size:28px">${item?.emoji || '🎨'}</div>
+        ${cor}
+      </div>`;
+    });
+    document.getElementById('cores').innerHTML = html;
+    document.getElementById('label-cor').textContent = 'Cor das Contas';
+
+    const coresEl = document.getElementById('cores-area');
+    coresEl.style.display = 'block';
+    document.getElementById('misterios-area').style.display = 'none';
+    revelarSecao(coresEl);
+    return;
+  }
+
+  const cores = coresPorTipo[tipo] || coresDisponiveis;
+  let html = '';
+  Object.keys(cores).forEach(cor => {
+    html += `<div class="option" data-cor="${cor}" onclick="selectCorBase(this)"><div class="option-media" style="font-size:28px">${cores[cor][0]?.emoji || '🎨'}</div>${cor}</div>`;
+  });
+  document.getElementById('cores').innerHTML = html;
+
+  const labelsCor = {
+    infantil: 'Cor Favorita',
+    chaveiro: 'Cor das Contas',
+    veiculo:  'Cor das Contas',
+    pulso:    'Acabamento das Contas'
+  };
+  document.getElementById('label-cor').textContent = labelsCor[tipo] || 'Cor';
+
+  const coresEl = document.getElementById('cores-area');
+  coresEl.style.display = 'block';
+  document.getElementById('misterios-area').style.display = 'none';
+  revelarSecao(coresEl);
+}
+
+function selectCorLuxo(el) {
+  const cor = el.dataset.cor;
+  selecao.corBase = cor;
+  marcarSelecionado(el);
+
+  if (cor === 'Cristais') {
+    const itens = coresLuxo['Cristais'];
+    let html = '';
+    itens.forEach(t => {
+      html += `
+        <div class="option" data-nome="${t.nome}" data-preco="${t.preco}" onclick="selectCorFinalLuxo(this)">
+          ${renderMedia(t)}
+          <span>${t.nome}</span>
+          <span class="price">R$ ${t.preco},00</span>
+        </div>`;
+    });
+    document.getElementById('cores').innerHTML = html;
+  } else {
+    selecao.cor = cor;
+    precoCor = 0;
+    selecao.misterioCat = selecao.misterio = '';
+    precoMisterio = 0;
+    recalcularTotal();
+    mostrarMisteriosLuxo();
+  }
+}
+
+function selectCorFinalLuxo(el) {
+  selecao.cor = el.dataset.nome;
+  precoCor    = Number(el.dataset.preco);
+  selecao.misterioCat = selecao.misterio = '';
+  precoMisterio = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+  mostrarMisteriosLuxo();
+}
+
+function mostrarMisteriosLuxo() {
+  const bancoMisterios = bancoMisteriosPorTipo.luxo;
+  let html = '';
+  Object.keys(bancoMisterios).forEach(cat => {
+    html += `<div class="option" data-cat="${cat}" onclick="selectMisterioCat(this)"><div class="option-media" style="font-size:28px">${bancoMisterios[cat][0]?.emoji || '📿'}</div>${cat}</div>`;
+  });
+  document.getElementById('misterios').innerHTML = html;
+  document.getElementById('label-misterio').textContent = 'Mistério / Pingente';
+
+  const misteriosEl = document.getElementById('misterios-area');
+  misteriosEl.style.display = 'block';
+  document.getElementById('personalizacao-area').style.display = 'none';
+  revelarSecao(misteriosEl);
+}
+
+function selectCorNoivaFinal(el) {
+  selecao.cor = el.dataset.cor;
+  precoCor = 0;
+  selecao.comFoto = selecao.formaMontagem = '';
+  recalcularTotal();
+  marcarSelecionado(el);
+  mostrarFotoArea();
+}
+
+function mostrarFotoArea() {
+  const html = `
+    <div class="option" data-valor="com-foto" onclick="selectFoto(this)">
+      <div class="option-media">📸</div>
+      <span>Com foto</span>
+    </div>
+    <div class="option" data-valor="sem-foto" onclick="selectFoto(this)">
+      <div class="option-media">🚫</div>
+      <span>Sem foto</span>
+    </div>`;
+  document.getElementById('foto-opcoes').innerHTML = html;
+
+  const fotoEl = document.getElementById('foto-area');
+  fotoEl.style.display = 'block';
+  document.getElementById('montagem-area').style.display = 'none';
+  document.getElementById('personalizacao-area').style.display = 'none';
+  revelarSecao(fotoEl);
+}
+
+function selectFoto(el) {
+  selecao.comFoto = el.dataset.valor;
+  selecao.formaMontagem = '';
+  marcarSelecionado(el);
+  mostrarMontagemArea();
+}
+
+function mostrarMontagemArea() {
+  const html = `
+    <div class="option" data-valor="linha" onclick="selectMontagem(this)">
+      <div class="option-media">🧵</div>
+      <span>Linha</span>
+    </div>
+    <div class="option" data-valor="arame" onclick="selectMontagem(this)">
+      <div class="option-media">🔗</div>
+      <span>Arame</span>
+    </div>`;
+  document.getElementById('montagem-opcoes').innerHTML = html;
+
+  const montagemEl = document.getElementById('montagem-area');
+  montagemEl.style.display = 'block';
+  document.getElementById('personalizacao-area').style.display = 'none';
+  revelarSecao(montagemEl);
+}
+
+function selectMontagem(el) {
+  selecao.formaMontagem = el.dataset.valor;
+  marcarSelecionado(el);
+  mostrarPersonalizacao(selecao.tipo);
+}
+
+function selectCorBase(el) {
+  selecao.corBase = el.dataset.cor;
+  selecao.cor = selecao.misterioCat = selecao.misterio = '';
+  precoCor = precoMisterio = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+
+  const tipo = selecao.tipo;
+  const cores = coresPorTipo[tipo] || coresDisponiveis;
+
+  let html = '';
+  cores[el.dataset.cor].forEach(t => {
+    html += `
+      <div class="option" data-nome="${t.nome}" data-preco="${t.preco}" onclick="selectCorFinal(this)">
+        ${renderMedia(t)}
+        <span>${t.nome}</span>
+        <span class="price">R$ ${t.preco},00</span>
+      </div>`;
+  });
+  document.getElementById('cores').innerHTML = html;
+}
+
+function selectCorFinal(el) {
+  selecao.cor = el.dataset.nome;
+  precoCor    = Number(el.dataset.preco);
+  selecao.misterioCat = selecao.misterio = '';
+  precoMisterio = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+
+  const tipo = selecao.tipo;
+
+  if (tiposSemMisterio.includes(tipo)) {
+    document.getElementById('misterios-area').style.display = 'none';
+    if (tipo === 'pulso') {
+      // Pulso não tem etapa de mistério nem de personalização
+      document.getElementById('personalizacao-area').style.display = 'none';
+      recalcularTotal();
+    } else {
+      // Chaveiro e Veículo pulam o mistério e vão direto para a personalização
+      mostrarPersonalizacao(tipo);
+    }
+    return;
+  }
+
+  const bancoMisterios = bancoMisteriosPorTipo[tipo] || bancoMisteriosPorTipo.default;
+
+  let html = '';
+  Object.keys(bancoMisterios).forEach(cat => {
+    html += `<div class="option" data-cat="${cat}" onclick="selectMisterioCat(this)"><div class="option-media" style="font-size:28px">${bancoMisterios[cat][0]?.emoji || '📿'}</div>${cat}</div>`;
+  });
+  document.getElementById('misterios').innerHTML = html;
+
+  const labelsMisterio = {
+    infantil: 'Mistérios',
+    chaveiro: 'Pingente',
+    veiculo:  'Pingente'
+  };
+  document.getElementById('label-misterio').textContent = labelsMisterio[tipo] || 'Mistério';
+
+  const misteriosEl = document.getElementById('misterios-area');
+  misteriosEl.style.display = 'block';
+  document.getElementById('personalizacao-area').style.display = 'none';
+  revelarSecao(misteriosEl);
+}
+
+function selectMisterioCat(el) {
+  selecao.misterioCat = el.dataset.cat;
+  selecao.misterio = ''; precoMisterio = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+
+  const tipo = selecao.tipo;
+  const bancoMisterios = bancoMisteriosPorTipo[tipo] || bancoMisteriosPorTipo.default;
+
+  let html = '';
+  bancoMisterios[el.dataset.cat].forEach(m => {
+    html += `
+      <div class="option" data-nome="${m.nome}" data-preco="${m.preco}" onclick="selectMisterioFinal(this)">
+        ${renderMedia(m)}
+        <span>${m.nome}</span>
+        <span class="price">R$ ${m.preco},00</span>
+      </div>`;
+  });
+  document.getElementById('misterios').innerHTML = html;
+}
+
+function selectMisterioFinal(el) {
+  selecao.misterio = el.dataset.nome;
+  precoMisterio    = Number(el.dataset.preco);
+  recalcularTotal();
+  marcarSelecionado(el);
+  mostrarPersonalizacao(selecao.tipo);
+}
+
+/* =============================================
+   PERSONALIZAÇÃO
+   ============================================= */
+function mostrarPersonalizacao(tipo) {
+  const area = document.getElementById('personalizacao-area');
+  const conteudo = document.getElementById('personalizacao-conteudo');
+
+  if (!selecao.personalizacao.nomes) selecao.personalizacao.nomes = [''];
+
+  if (tipo === 'tradicional' || tipo === 'chaveiro' || tipo === 'veiculo') {
+    const precisaFoto = selecao.categoria === 'Foto Personalizada';
+    const fotoHtml = precisaFoto ? `
+      <div class="campo-upload" style="margin-bottom:12px;">
+        <label>📸 Enviar a foto para personalização</label>
+        <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
+        <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
+          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+        </span>
+      </div>` : '';
+
+    conteudo.innerHTML = `
+      ${fotoHtml}
+      <div id="nomes-dinamicos">
+        ${renderNomesBloco(selecao.personalizacao.nomes)}
+      </div>`;
+    area.style.display = 'block';
+    revelarSecao(area);
+
+  } else if (tipo === 'infantil') {
+    conteudo.innerHTML = `
+      <div id="nomes-dinamicos">
+        ${renderNomesBloco(selecao.personalizacao.nomes)}
+      </div>`;
+    area.style.display = 'block';
+    revelarSecao(area);
+
+  } else if (tipo === 'luxo') {
+    const precisaFoto = luxoCatsComFoto.includes(selecao.categoria);
+    const fotoHtml = precisaFoto ? `
+      <div class="campo-upload" style="margin-top:12px;">
+        <label>📸 Enviar foto ${selecao.categoria === 'Linha de Luxo' ? 'para o relicário' : '(modelo de referência)'}</label>
+        <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
+        <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
+          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+        </span>
+      </div>` : '';
+
+    conteudo.innerHTML = `
+      ${fotoHtml}
+      <div id="nomes-dinamicos" style="margin-top:${precisaFoto ? '4px' : '0'}">
+        ${renderNomesBloco(selecao.personalizacao.nomes)}
+      </div>`;
+    area.style.display = 'block';
+    revelarSecao(area);
+
+  } else if (tipo === 'noiva') {
+    const resumoFoto     = selecao.comFoto === 'com-foto' ? '📸 Com foto' : '🚫 Sem foto';
+    const resumoMontagem = selecao.formaMontagem === 'linha' ? '🧵 Linha' : '🔗 Arame';
+    conteudo.innerHTML = `
+      <div style="background:#fffbe8;border:1px solid #ffd966;border-radius:10px;padding:12px;margin-bottom:12px;font-size:12px;color:#888;line-height:1.8;">
+        <strong style="color:#b8860b;">Resumo das escolhas:</strong><br>
+        Cor: <strong style="color:#444;">${selecao.cor}</strong><br>
+        Foto: <strong style="color:#444;">${resumoFoto}</strong><br>
+        Montagem: <strong style="color:#444;">${resumoMontagem}</strong>
+      </div>
+      <div class="campo-texto">
+        <label>Nome do casal ou mensagem (opcional)</label>
+        <input type="text" placeholder="Ex: Ana & João — 15/06/2025"
+          value="${selecao.personalizacao.texto || ''}"
+          oninput="selecao.personalizacao.texto = this.value">
+      </div>
+      ${selecao.comFoto === 'com-foto' ? `
+      <div class="campo-upload" style="margin-top:10px;">
+        <label>Enviar foto</label>
+        <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
+        <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
+          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+        </span>
+      </div>` : ''}`;
+    area.style.display = 'block';
+    revelarSecao(area);
+
+  } else if (tipo === 'embalagem') {
+    conteudo.innerHTML = `
+      <div class="campo-texto">
+        <label>Nome do presenteado</label>
+        <input type="text" placeholder="Ex: Maria"
+          value="${selecao.personalizacao.nome || ''}"
+          oninput="selecao.personalizacao.nome = this.value">
+      </div>
+      <div class="campo-texto" style="margin-top:10px;">
+        <label>Cor da embalagem</label>
+        <input type="text" placeholder="Ex: Rosa, Azul, Dourado..."
+          value="${selecao.personalizacao.cor || ''}"
+          oninput="selecao.personalizacao.cor = this.value">
+      </div>
+      <div class="campo-texto" style="margin-top:10px;">
+        <label>Frase / Versículo (opcional)</label>
+        <textarea placeholder="Ex: Feliz aniversário! / João 3:16"
+          oninput="selecao.personalizacao.frase = this.value">${selecao.personalizacao.frase || ''}</textarea>
+      </div>
+      <div class="campo-texto" style="margin-top:10px;">
+        <label>Formato</label>
+        <div class="formato-opcoes">
+          <label>
+            <input type="radio" name="formato" value="livrinho"
+              ${selecao.personalizacao.formato === 'livrinho' ? 'checked' : ''}
+              onchange="selecao.personalizacao.formato = this.value">
+            Livrinho
+          </label>
+          <label>
+            <input type="radio" name="formato" value="folha-unica"
+              ${selecao.personalizacao.formato === 'folha-unica' ? 'checked' : ''}
+              onchange="selecao.personalizacao.formato = this.value">
+            Folha única
+          </label>
+        </div>
+      </div>
+      <div class="campo-upload" style="margin-top:10px;">
+        <label>Foto/Desenho (opcional)</label>
+        <input type="file" id="pers-foto" accept="image/*" onchange="handleFotoUpload(this)">
+        <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
+          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+        </span>
+      </div>`;
+    area.style.display = 'block';
+    revelarSecao(area);
+
+  } else {
+    area.style.display = 'none';
+  }
+}
+
+function handleFotoUpload(input) {
+  if (input.files && input.files[0]) {
+    const arquivo = input.files[0];
+    selecao.personalizacao.fotoNome = arquivo.name;
+    const el = document.getElementById('foto-nome');
+    if (el) el.textContent = arquivo.name;
+    const reader = new FileReader();
+    reader.onload = e => { selecao.personalizacao.fotoBase64 = e.target.result; };
+    reader.readAsDataURL(arquivo);
+  }
+}
+
+/* =============================================
+   VALIDAÇÃO E FINALIZAÇÃO
+   ============================================= */
+function finalizar() {
+  const tipo = selecao.tipo;
+
+  if (!tipo) {
+    mostrarPopupErro('Campo obrigatório', 'Escolha o tipo do produto.');
+    return;
+  }
+  if (!selecao.categoria && tipo !== 'embalagem') {
+    mostrarPopupErro('Campo obrigatório', 'Escolha uma categoria.');
+    return;
+  }
+  if (!selecao.modelo) {
+    mostrarPopupErro('Campo obrigatório', 'Escolha um modelo.');
+    return;
+  }
+
+  if (!tiposSemCorMisterio.includes(tipo)) {
+    if (tipo === 'noiva') {
+      if (!selecao.cor) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha a cor das contas.');
+        return;
+      }
+      if (!selecao.comFoto) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha: com foto ou sem foto.');
+        return;
+      }
+      if (!selecao.formaMontagem) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha a forma de montar: Linha ou Arame.');
+        return;
+      }
+    } else if (tiposSemMisterio.includes(tipo)) {
+      if (!selecao.cor) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha a cor / acabamento.');
+        return;
+      }
+    } else {
+      if (!selecao.cor) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha a cor final.');
+        return;
+      }
+      if (!selecao.misterio) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha um mistério / pingente.');
+        return;
+      }
+    }
+  }
+
+  const totalNum = precoModelo + precoCor + precoMisterio + precoNomes;
+
+  const nomes = {
+    pulso:       'Terço de Pulso',
+    tradicional: 'Terço Personalizado',
+    chaveiro:    'Chaveiro',
+    veiculo:     'Terço de Veículo',
+    noiva:       'Terço de Noiva',
+    luxo:        'Terço Luxo',
+    infantil:    'Terço Infantil',
+    embalagem:   'Embalagem'
+  };
+
+  const item = {
+    tipo,
+    nome:           nomes[tipo] || tipo,
+    categoria:      selecao.categoria || selecao.modelo,
+    modelo:         selecao.modelo,
+    cor:            selecao.cor           || '',
+    misterio:       selecao.misterio      || '',
+    comFoto:        selecao.comFoto       || '',
+    formaMontagem:  selecao.formaMontagem || '',
+    personalizacao: { ...selecao.personalizacao },
+    total:          totalNum,
+    origem:         'personalizado'
+  };
+
+  const itemSalvo = { ...item, personalizacao: { ...item.personalizacao } };
+  if (itemSalvo.personalizacao.fotoBase64) {
+    delete itemSalvo.personalizacao.fotoBase64;
+    itemSalvo.personalizacao.temFoto = true;
+  }
+
+  try {
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    carrinho.push(itemSalvo);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+  } catch(e) {
+    console.warn('localStorage indisponível', e);
+  }
+
+  mostrarPopupSucesso();
+}
+
+/* =============================================
+   POPUPS
+   ============================================= */
+function mostrarPopupSucesso() {
+  document.getElementById('popup-overlay').classList.add('ativo');
+}
+function fecharPopup() {
+  document.getElementById('popup-overlay').classList.remove('ativo');
+  selecao = { tipo:'', categoria:'', modelo:'', corBase:'', cor:'', misterioCat:'', misterio:'', comFoto:'', formaMontagem:'', personalizacao:{ nomes: [''] } };
+  precoModelo = precoCor = precoMisterio = precoNomes = 0;
+  recalcularTotal();
+  ['categorias-area','modelos-area','cores-area','misterios-area','foto-area','montagem-area','personalizacao-area'].forEach(id =>
+    document.getElementById(id).style.display = 'none'
+  );
+  document.querySelectorAll('.option, .tipo-card').forEach(o => o.classList.remove('selected'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function mostrarPopupErro(titulo, msg) {
+  document.getElementById('popup-erro-titulo').textContent = titulo;
+  document.getElementById('popup-erro-msg').textContent    = msg;
+  document.getElementById('popup-erro-overlay').classList.add('ativo');
+}
+function fecharPopupErro() {
+  document.getElementById('popup-erro-overlay').classList.remove('ativo');
+}
+
+document.getElementById('popup-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharPopup();
+});
+document.getElementById('popup-erro-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharPopupErro();
+});
+
+atualizarProgresso();
+</script>
+</body>
+</html>
