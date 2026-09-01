@@ -899,6 +899,18 @@ function gerarModelosMaterial(prefixo, preco, emoji) {
   }));
 }
 
+// Cria uma cópia independente de um catálogo de categorias, para que tipos que
+// compartilham os mesmos nomes/preços (ex: Chaveiro e Veículo usando o catálogo
+// de Personalizados) possam ter fotos diferentes em cada item, já que na prática
+// são produtos fisicamente diferentes (terço completo x chaveiro x terço de veículo).
+function clonarCategorias(obj) {
+  const copia = {};
+  Object.keys(obj).forEach(cat => {
+    copia[cat] = obj[cat].map(item => ({ ...item }));
+  });
+  return copia;
+}
+
 const bancoModelos = {
   pulso: {
     "São Bento":                gerarModelosMaterial("São Bento Pulso", 35, '✝️'),
@@ -906,9 +918,11 @@ const bancoModelos = {
     "Nossa Senhora das Graças": gerarModelosMaterial("Graças Pulso", 35, '💙')
   },
   tradicional: categoriasTradicional,
-  // Chaveiro usa o mesmo catálogo de Personalizados (idêntico), só sem a etapa de mistério
-  chaveiro: categoriasTradicional,
-  veiculo: categoriasTradicional,
+  // Chaveiro e Veículo têm os mesmos nomes/categorias/preços de Personalizados,
+  // mas cada item é uma cópia própria — assim dá pra colocar fotos diferentes
+  // (foto do chaveiro ≠ foto do terço ≠ foto do item de veículo) sem conflito.
+  chaveiro: clonarCategorias(categoriasTradicional),
+  veiculo: clonarCategorias(categoriasTradicional),
   noiva: {
     "Prata":   gerarItens("Noiva Prata", 20, 65, '🪙'),
     "Dourado": gerarItens("Noiva Dourado", 20, 70, '💛')
@@ -939,6 +953,24 @@ const ESTILOS_PULSO     = ['Leitoso', 'Perolado', 'Cristal'];
 const ESTILOS_PADRAO_6  = ['Cintilante', 'Fosco', 'Perolado', 'Leitoso', 'Cristal Facetado de Vidro', 'Granulado'];
 const ESTILOS_INFANTIL  = ['Fosco', 'Leitoso', 'Cintilante', 'Perolado'];
 
+// ─────────────────────────────────────────────────────────────
+// BIBLIOTECA CENTRAL DE FOTOS DE COR / ACABAMENTO
+// Preencha aqui UMA foto por combinação de cor + acabamento e ela
+// aparece automaticamente em TODOS os lugares que usam essa cor:
+// Pulso, Personalizados, Chaveiro, Veículo, Luxo e Infantil.
+// Exemplo de uso:
+//   IMAGENS_CORES['Preto|Leitoso'] = 'imagens/preto-leitoso.jpg';
+//   IMAGENS_CORES['Rosa|Cintilante'] = 'imagens/rosa-cintilante.jpg';
+// Se não houver entrada aqui, o site mostra o emoji normalmente.
+// ─────────────────────────────────────────────────────────────
+const IMAGENS_CORES = {
+  'Preto|Leitoso': 'preto_leitoso.png'
+};
+
+function obterImagemCor(corBase, estilo) {
+  return IMAGENS_CORES[`${corBase}|${estilo}`] || null;
+}
+
 const CORES_BASE = [
   { nome: 'Preto',    emoji: '🖤' },
   { nome: 'Azul',     emoji: '💙' },
@@ -951,8 +983,14 @@ const CORES_BASE = [
   { nome: 'Verde',    emoji: '💚' }
 ];
 
-function gerarCoresEstilo(corNome, estilos, preco, emoji) {
-  return estilos.map(estilo => ({ nome: `${corNome} ${estilo}`, preco: preco, img: null, emoji: emoji }));
+function gerarCoresEstilo(corBase, estilos, preco, emoji, prefixoExibicao) {
+  const prefixo = prefixoExibicao || corBase;
+  return estilos.map(estilo => ({
+    nome: `${prefixo} ${estilo}`,
+    preco: preco,
+    img: obterImagemCor(corBase, estilo),
+    emoji: emoji
+  }));
 }
 
 // Pulso: todas as cores, com apenas 3 opções (Leitoso / Perolado / Cristal)
