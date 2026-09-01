@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Monte seu Terço - Laços Encantus</title>
+<link rel="icon" type="image/png" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -689,6 +690,19 @@ function revelarSecao(idOuEl) {
 }
 
 /* =============================================
+   UTILITÁRIO DE SEGURANÇA (escapa HTML de inputs do usuário)
+   ============================================= */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/* =============================================
    ESTADO GLOBAL
    ============================================= */
 let selecao = {
@@ -719,8 +733,8 @@ function atualizarProgresso() {
   if (selecao.tipo) passo++;
   if (selecao.categoria || selecao.tipo === 'embalagem') passo++;
   if (selecao.modelo) passo++;
-  if (selecao.cor || tiposSemCorMisterio.includes(selecao.tipo) || selecao.tipo === 'noiva') passo++;
-  if (selecao.misterio || tiposSemCorMisterio.includes(selecao.tipo) || tiposSemMisterio.includes(selecao.tipo) || selecao.formaMontagem) passo++;
+  if (selecao.cor || tiposSemCorMisterio.includes(selecao.tipo)) passo++;
+  if (selecao.misterio || tiposSemCorMisterio.includes(selecao.tipo) || (tiposSemMisterio.includes(selecao.tipo) && selecao.cor) || selecao.formaMontagem) passo++;
 
   const pct = Math.round((passo / 5) * 100);
   document.getElementById('progress-fill').style.width = pct + '%';
@@ -788,7 +802,7 @@ function renderNomesBloco(nomesArray) {
       : '';
     html += `
       <div class="nome-row" id="nome-row-${i}">
-        <input type="text" placeholder="Nome ${i + 1}" value="${nome}"
+        <input type="text" placeholder="Nome ${i + 1}" value="${escapeHtml(nome)}"
           oninput="atualizarNome(${i}, this.value)">
         ${badge}
         ${remBtn}
@@ -964,11 +978,19 @@ const ESTILOS_INFANTIL  = ['Fosco', 'Leitoso', 'Cintilante', 'Perolado'];
 // Se não houver entrada aqui, o site mostra o emoji normalmente.
 // ─────────────────────────────────────────────────────────────
 const IMAGENS_CORES = {
-  'Preto|Leitoso': 'preto_leitoso.png'
+  'Preto|Cintilante': './preto_cintilante.png',
+  'Preto|Fosco': './preto_fosco.png',
+  'Preto|Leitoso': './preto_leitoso.png',
+  'Preto|Perolado': './preto_perolado.png',
+  'Preto|Cristal Facetado de Vidro': './preto_cristal_facetado_de_vidro.png',
+  'Preto|Granulado': './preto_granulado.png'
 };
 
 function obterImagemCor(corBase, estilo) {
-  return IMAGENS_CORES[`${corBase}|${estilo}`] || null;
+  const nomeBase = corBase.replace(/\s+Luxo$/, '');
+  return IMAGENS_CORES[`${corBase}|${estilo}`]
+      || IMAGENS_CORES[`${nomeBase}|${estilo}`]
+      || null;
 }
 
 const CORES_BASE = [
@@ -1310,26 +1332,19 @@ function selectCorLuxo(el) {
   selecao.corBase = cor;
   marcarSelecionado(el);
 
-  if (cor === 'Cristais') {
-    const itens = coresLuxo['Cristais'];
-    let html = '';
-    itens.forEach(t => {
-      html += `
-        <div class="option" data-nome="${t.nome}" data-preco="${t.preco}" onclick="selectCorFinalLuxo(this)">
-          ${renderMedia(t)}
-          <span>${t.nome}</span>
-          <span class="price">R$ ${t.preco},00</span>
-        </div>`;
-    });
-    document.getElementById('cores').innerHTML = html;
-  } else {
-    selecao.cor = cor;
-    precoCor = 0;
-    selecao.misterioCat = selecao.misterio = '';
-    precoMisterio = 0;
-    recalcularTotal();
-    mostrarMisteriosLuxo();
-  }
+  // Todas as cores da linha Luxo (não só "Cristais") têm sub-opções de
+  // acabamento (Cintilante, Fosco, Perolado, etc.), cada uma a R$ 8,00.
+  const itens = coresLuxo[cor];
+  let html = '';
+  itens.forEach(t => {
+    html += `
+      <div class="option" data-nome="${t.nome}" data-preco="${t.preco}" onclick="selectCorFinalLuxo(this)">
+        ${renderMedia(t)}
+        <span>${t.nome}</span>
+        <span class="price">R$ ${t.preco},00</span>
+      </div>`;
+  });
+  document.getElementById('cores').innerHTML = html;
 }
 
 function selectCorFinalLuxo(el) {
@@ -1527,7 +1542,7 @@ function mostrarPersonalizacao(tipo) {
         <label>📸 Enviar a foto para personalização</label>
         <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
         <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
-          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+          ${escapeHtml(selecao.personalizacao.fotoNome) || 'Nenhum arquivo selecionado'}
         </span>
       </div>` : '';
 
@@ -1554,7 +1569,7 @@ function mostrarPersonalizacao(tipo) {
         <label>📸 Enviar foto ${selecao.categoria === 'Linha de Luxo' ? 'para o relicário' : '(modelo de referência)'}</label>
         <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
         <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
-          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+          ${escapeHtml(selecao.personalizacao.fotoNome) || 'Nenhum arquivo selecionado'}
         </span>
       </div>` : '';
 
@@ -1572,14 +1587,14 @@ function mostrarPersonalizacao(tipo) {
     conteudo.innerHTML = `
       <div style="background:#fffbe8;border:1px solid #ffd966;border-radius:10px;padding:12px;margin-bottom:12px;font-size:12px;color:#888;line-height:1.8;">
         <strong style="color:#b8860b;">Resumo das escolhas:</strong><br>
-        Cor: <strong style="color:#444;">${selecao.cor}</strong><br>
+        Cor: <strong style="color:#444;">${escapeHtml(selecao.cor)}</strong><br>
         Foto: <strong style="color:#444;">${resumoFoto}</strong><br>
         Montagem: <strong style="color:#444;">${resumoMontagem}</strong>
       </div>
       <div class="campo-texto">
         <label>Nome do casal ou mensagem (opcional)</label>
         <input type="text" placeholder="Ex: Ana & João — 15/06/2025"
-          value="${selecao.personalizacao.texto || ''}"
+          value="${escapeHtml(selecao.personalizacao.texto)}"
           oninput="selecao.personalizacao.texto = this.value">
       </div>
       ${selecao.comFoto === 'com-foto' ? `
@@ -1587,7 +1602,7 @@ function mostrarPersonalizacao(tipo) {
         <label>Enviar foto</label>
         <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
         <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
-          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+          ${escapeHtml(selecao.personalizacao.fotoNome) || 'Nenhum arquivo selecionado'}
         </span>
       </div>` : ''}`;
     area.style.display = 'block';
@@ -1598,19 +1613,19 @@ function mostrarPersonalizacao(tipo) {
       <div class="campo-texto">
         <label>Nome do presenteado</label>
         <input type="text" placeholder="Ex: Maria"
-          value="${selecao.personalizacao.nome || ''}"
+          value="${escapeHtml(selecao.personalizacao.nome)}"
           oninput="selecao.personalizacao.nome = this.value">
       </div>
       <div class="campo-texto" style="margin-top:10px;">
         <label>Cor da embalagem</label>
         <input type="text" placeholder="Ex: Rosa, Azul, Dourado..."
-          value="${selecao.personalizacao.cor || ''}"
+          value="${escapeHtml(selecao.personalizacao.cor)}"
           oninput="selecao.personalizacao.cor = this.value">
       </div>
       <div class="campo-texto" style="margin-top:10px;">
         <label>Frase / Versículo (opcional)</label>
         <textarea placeholder="Ex: Feliz aniversário! / João 3:16"
-          oninput="selecao.personalizacao.frase = this.value">${selecao.personalizacao.frase || ''}</textarea>
+          oninput="selecao.personalizacao.frase = this.value">${escapeHtml(selecao.personalizacao.frase)}</textarea>
       </div>
       <div class="campo-texto" style="margin-top:10px;">
         <label>Formato</label>
@@ -1633,7 +1648,7 @@ function mostrarPersonalizacao(tipo) {
         <label>Foto/Desenho (opcional)</label>
         <input type="file" id="pers-foto" accept="image/*" onchange="handleFotoUpload(this)">
         <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
-          ${selecao.personalizacao.fotoNome || 'Nenhum arquivo selecionado'}
+          ${escapeHtml(selecao.personalizacao.fotoNome) || 'Nenhum arquivo selecionado'}
         </span>
       </div>`;
     area.style.display = 'block';
@@ -1743,11 +1758,11 @@ function finalizar() {
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
     carrinho.push(itemSalvo);
     localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    mostrarPopupSucesso();
   } catch(e) {
     console.warn('localStorage indisponível', e);
+    mostrarPopupErro('Não foi possível salvar', 'Não conseguimos adicionar o item ao carrinho neste navegador. Tente liberar espaço de armazenamento ou usar outro navegador/aba (evite o modo anônimo).');
   }
-
-  mostrarPopupSucesso();
 }
 
 /* =============================================
