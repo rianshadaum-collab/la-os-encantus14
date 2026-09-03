@@ -166,6 +166,7 @@ nav a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; 
   justify-content: center;
   background: linear-gradient(135deg, #fff5fb, #fffbe8);
   font-size: 38px;
+  position: relative;
 }
 .option-media img {
   width: 100%;
@@ -173,6 +174,19 @@ nav a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; 
   object-fit: cover;
   border-radius: 8px;
   display: block;
+}
+/* Marca d'água automática sobre fotos reais de produto (não aparece sobre emojis) */
+.option-media.tem-foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 55%;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
 
 .option.selected { border: 2px solid #d4af37; background: #fffbeb; }
@@ -627,24 +641,6 @@ nav a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; 
     <div id="relicario-opcoes" class="option-grid"></div>
   </div>
 
-  <!-- FOTO (Noiva) -->
-  <div id="foto-area" style="display:none;">
-    <div class="secao-header">
-      <label>Com foto ou Sem foto?</label>
-      <button class="btn-voltar" onclick="voltar('foto')">← Voltar</button>
-    </div>
-    <div id="foto-opcoes" class="option-grid-1"></div>
-  </div>
-
-  <!-- FORMA DE MONTAR: Linha / Arame (Noiva) -->
-  <div id="montagem-area" style="display:none;">
-    <div class="secao-header">
-      <label>Forma de montar: Linha ou Arame</label>
-      <button class="btn-voltar" onclick="voltar('montagem')">← Voltar</button>
-    </div>
-    <div id="montagem-opcoes" class="option-grid-1"></div>
-  </div>
-
   <!-- FORMA DE MONTAR (padrão novo, todos exceto Pulseira e Caixa) -->
   <div id="formaextra-area" style="display:none;">
     <div class="secao-header">
@@ -735,7 +731,6 @@ function escapeHtml(str) {
 let selecao = {
   tipo:'', categoria:'', modelo:'',
   corBase:'', cor:'', misterioCat:'', misterio:'',
-  comFoto: '', formaMontagem: '',
   cruz: '', relicarioOpcao: '', relicarioModelo: '', relicarioAcabamento: '',
   formaMontagemExtra: '',
   personalizacao: {}
@@ -763,7 +758,7 @@ function atualizarProgresso() {
   if (selecao.categoria || selecao.tipo === 'embalagem') passo++;
   if (selecao.modelo) passo++;
   if (selecao.cor || tiposSemCorMisterio.includes(selecao.tipo)) passo++;
-  if (selecao.misterio || tiposSemCorMisterio.includes(selecao.tipo) || (tiposSemMisterio.includes(selecao.tipo) && selecao.cor) || selecao.formaMontagem) passo++;
+  if (selecao.misterio || tiposSemCorMisterio.includes(selecao.tipo) || (tiposSemMisterio.includes(selecao.tipo) && selecao.cor) || selecao.formaMontagemExtra) passo++;
 
   const pct = Math.round((passo / 5) * 100);
   document.getElementById('progress-fill').style.width = pct + '%';
@@ -798,9 +793,9 @@ function irCarrinho() { window.location.href = 'carrinho.html'; }
 function renderMedia(item) {
   if (item.img) {
     return `
-      <div class="option-media">
+      <div class="option-media tem-foto">
         <img src="${item.img}" alt="${item.nome}"
-          onerror="this.parentElement.innerHTML='<span>${item.emoji || '📿'}</span>'">
+          onerror="this.parentElement.classList.remove('tem-foto'); this.parentElement.innerHTML='<span>${item.emoji || '📿'}</span>'">
       </div>`;
   }
   return `<div class="option-media">${item.emoji || '📿'}</div>`;
@@ -892,10 +887,11 @@ const categoriasTradicional = {
   "Nossa Senhora das Graças": gerarItens("Nossa Sra. das Graças", 10, 40, '💙'),
   "Guadalupe":                gerarItens("Guadalupe", 5, 40, '🌹'),
   "Santa Rita de Cássia":     gerarItens("Sta. Rita de Cássia", 5, 40, '🌸'),
-  "Santa Terezinha": [
-    { nome: "Santa Terezinha 1", preco: 40, img: "santa_terezinha_prata.png", emoji: '🌺' },
-    ...gerarItens("Santa Terezinha", 4, 40, '🌺')
-  ],
+  "Santa Terezinha":          (() => {
+    const itens = gerarItens("Santa Terezinha", 5, 40, '🌺');
+    itens[0].img = 'santa-terezinha-prata.png'; // foto real (acabamento Prata)
+    return itens;
+  })(),
   "Sagrada Família":          gerarItens("Sagrada Família", 5, 40, '👨‍👩‍👦'),
   "Nossa Senhora de Fátima":  gerarItens("Fátima", 5, 40, '⭐'),
   "São José":                 gerarItens("São José", 5, 40, '🛠️'),
@@ -1143,7 +1139,6 @@ const catalogoCruz = [
 
 // ── BLOCO "FORMA DE MONTAR" (padrão novo) ────────────────────
 // Disponível em todos os produtos, exceto Pulseira e Caixa/Embalagem.
-// Não confundir com o bloco "Linha / Arame" exclusivo da Noiva, que continua existindo.
 const tiposComFormaMontarExtra = ['tradicional', 'chaveiro', 'veiculo', 'noiva', 'luxo', 'infantil'];
 const opcoesFormaMontarExtra = [
   { nome: 'Normal',                        valor: 'normal',    emoji: '📿' },
@@ -1153,8 +1148,21 @@ const opcoesFormaMontarExtra = [
 ];
 
 // ── RELICÁRIO (Terço de Noiva) ───────────────────────────────
-// Reaproveita os 6 modelos de relicário já usados na Linha de Luxo.
-const relicariosNoiva = categoriasLuxo["Linha de Luxo"];
+// Reaproveita os modelos de relicário já usados na Linha de Luxo, agora
+// separados por tom: os modelos exibidos mudam conforme Prata/Dourado.
+// Para adicionar mais opções em algum tom, é só incluir novos itens aqui.
+const relicariosNoivaPorTom = {
+  prata: [
+    { nome: "Relicário Prata",   preco: 110, img: null, emoji: '🥈' },
+    { nome: "Relicário P Prata", preco: 95,  img: null, emoji: '🪙' }
+  ],
+  dourado: [
+    { nome: "Relicário Dourado",      preco: 120, img: null, emoji: '🥇' },
+    { nome: "Relicário Ouro Velho",   preco: 115, img: null, emoji: '🏆' },
+    { nome: "Relicário P Ouro",       preco: 100, img: null, emoji: '💛' },
+    { nome: "Relicário P Ouro Velho", preco: 105, img: null, emoji: '✨' }
+  ]
+};
 const acabamentosRelicarioNoiva = [
   { nome: 'Prata',   valor: 'prata',   emoji: '🥈' },
   { nome: 'Dourado', valor: 'dourado', emoji: '🥇' }
@@ -1172,55 +1180,54 @@ function resetarFluxo() {
   selecao = {
     tipo: tipoSalvo, categoria:'', modelo:'',
     corBase:'', cor:'', misterioCat:'', misterio:'',
-    comFoto: '', formaMontagem: '',
     cruz: '', relicarioOpcao: '', relicarioModelo: '', relicarioAcabamento: '',
     formaMontagemExtra: '',
     personalizacao: { nomes: [''] }
   };
   precoModelo = precoCor = precoMisterio = precoNomes = precoCruz = precoRelicario = 0;
   recalcularTotal();
-  ['modelos-area','cores-area','misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+  ['modelos-area','cores-area','misterios-area','cruz-area','relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
     document.getElementById(id).style.display = 'none'
   );
 }
 
 function voltar(etapa) {
   if (etapa === 'categorias') {
-    ['categorias-area','modelos-area','cores-area','misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+    ['categorias-area','modelos-area','cores-area','misterios-area','cruz-area','relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
       document.getElementById(id).style.display = 'none'
     );
-    selecao = { tipo:'', categoria:'', modelo:'', corBase:'', cor:'', misterioCat:'', misterio:'', comFoto:'', formaMontagem:'', cruz:'', relicarioOpcao:'', relicarioModelo:'', relicarioAcabamento:'', formaMontagemExtra:'', personalizacao:{ nomes: [''] } };
+    selecao = { tipo:'', categoria:'', modelo:'', corBase:'', cor:'', misterioCat:'', misterio:'', cruz:'', relicarioOpcao:'', relicarioModelo:'', relicarioAcabamento:'', formaMontagemExtra:'', personalizacao:{ nomes: [''] } };
     precoModelo = precoCor = precoMisterio = precoNomes = precoCruz = precoRelicario = 0;
     document.querySelectorAll('.option, .tipo-card').forEach(o => o.classList.remove('selected'));
     revelarSecao('tipo-grid');
 
   } else if (etapa === 'modelos') {
-    ['modelos-area','cores-area','misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+    ['modelos-area','cores-area','misterios-area','cruz-area','relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
       document.getElementById(id).style.display = 'none'
     );
-    selecao.modelo = selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
+    selecao.modelo = selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
     selecao.personalizacao = { nomes: [''] };
     precoModelo = precoCor = precoMisterio = precoNomes = precoCruz = precoRelicario = 0;
     revelarSecao('categorias-area');
 
   } else if (etapa === 'cores') {
-    ['cores-area','misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+    ['cores-area','misterios-area','cruz-area','relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
       document.getElementById(id).style.display = 'none'
     );
-    selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
+    selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
     precoCor = precoMisterio = precoCruz = precoRelicario = 0;
     revelarSecao('modelos-area');
 
   } else if (etapa === 'misterios') {
-    ['misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+    ['misterios-area','cruz-area','relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
       document.getElementById(id).style.display = 'none'
     );
-    selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = selecao.cruz = selecao.formaMontagemExtra = '';
+    selecao.misterioCat = selecao.misterio = selecao.cruz = selecao.formaMontagemExtra = '';
     precoMisterio = precoCruz = 0;
     revelarSecao('cores-area');
 
   } else if (etapa === 'cruz') {
-    ['cruz-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+    ['cruz-area','formaextra-area','personalizacao-area'].forEach(id =>
       document.getElementById(id).style.display = 'none'
     );
     selecao.cruz = selecao.formaMontagemExtra = '';
@@ -1231,26 +1238,12 @@ function voltar(etapa) {
     revelarSecao(temMisterio ? 'misterios-area' : 'cores-area');
 
   } else if (etapa === 'relicario') {
-    ['relicario-area','misterios-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+    ['relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
       document.getElementById(id).style.display = 'none'
     );
-    selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.misterio = selecao.comFoto = selecao.formaMontagem = selecao.formaMontagemExtra = '';
-    precoRelicario = precoMisterio = 0;
-    revelarSecao('cores-area');
-
-  } else if (etapa === 'foto') {
-    ['foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
-      document.getElementById(id).style.display = 'none'
-    );
-    selecao.comFoto = selecao.formaMontagem = selecao.formaMontagemExtra = '';
-    revelarSecao(selecao.tipo === 'noiva' ? 'misterios-area' : 'cores-area');
-
-  } else if (etapa === 'montagem') {
-    ['montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
-      document.getElementById(id).style.display = 'none'
-    );
-    selecao.formaMontagem = selecao.formaMontagemExtra = '';
-    revelarSecao('foto-area');
+    selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
+    precoRelicario = 0;
+    revelarSecao('misterios-area');
 
   } else if (etapa === 'formaextra') {
     ['formaextra-area','personalizacao-area'].forEach(id =>
@@ -1258,7 +1251,11 @@ function voltar(etapa) {
     );
     selecao.formaMontagemExtra = '';
     const tipo = selecao.tipo;
-    if (tipo === 'noiva') revelarSecao('montagem-area');
+    if (tipo === 'noiva') {
+      selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = '';
+      precoRelicario = 0;
+      mostrarRelicarioArea();
+    }
     else if (tiposComCruz.includes(tipo)) revelarSecao('cruz-area');
     else revelarSecao('misterios-area');
   }
@@ -1307,11 +1304,11 @@ function selectTipo(valor, el) {
 function selectCategoria(el) {
   const tipo = el.dataset.tipo, cat = el.dataset.cat;
   selecao.categoria = cat;
-  selecao.modelo = selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
+  selecao.modelo = selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
   selecao.personalizacao = { nomes: [''] };
   precoModelo = precoCor = precoMisterio = precoNomes = precoCruz = precoRelicario = 0;
   recalcularTotal();
-  ['modelos-area','cores-area','misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area'].forEach(id =>
+  ['modelos-area','cores-area','misterios-area','cruz-area','relicario-area','formaextra-area'].forEach(id =>
     document.getElementById(id).style.display = 'none'
   );
   marcarSelecionado(el);
@@ -1354,7 +1351,7 @@ function selectCategoria(el) {
 function selectModelo(el) {
   selecao.modelo = el.dataset.nome;
   precoModelo    = Number(el.dataset.preco);
-  selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.comFoto = selecao.formaMontagem = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
+  selecao.corBase = selecao.cor = selecao.misterioCat = selecao.misterio = selecao.cruz = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.formaMontagemExtra = '';
   precoCor = precoMisterio = precoCruz = precoRelicario = 0;
   recalcularTotal();
   marcarSelecionado(el);
@@ -1383,8 +1380,6 @@ function selectModelo(el) {
     const coresEl = document.getElementById('cores-area');
     coresEl.style.display = 'block';
     document.getElementById('misterios-area').style.display = 'none';
-    document.getElementById('foto-area').style.display = 'none';
-    document.getElementById('montagem-area').style.display = 'none';
     revelarSecao(coresEl);
     return;
   }
@@ -1478,62 +1473,11 @@ function mostrarMisteriosLuxo() {
 function selectCorNoivaFinal(el) {
   selecao.cor = el.dataset.cor;
   precoCor = 0;
-  selecao.comFoto = selecao.formaMontagem = selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.misterio = '';
+  selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = selecao.misterio = selecao.formaMontagemExtra = '';
   precoRelicario = precoMisterio = 0;
   recalcularTotal();
   marcarSelecionado(el);
-  mostrarRelicarioArea();
-}
-
-function mostrarFotoArea() {
-  const html = `
-    <div class="option" data-valor="com-foto" onclick="selectFoto(this)">
-      <div class="option-media">📸</div>
-      <span>Com foto</span>
-    </div>
-    <div class="option" data-valor="sem-foto" onclick="selectFoto(this)">
-      <div class="option-media">🚫</div>
-      <span>Sem foto</span>
-    </div>`;
-  document.getElementById('foto-opcoes').innerHTML = html;
-
-  const fotoEl = document.getElementById('foto-area');
-  fotoEl.style.display = 'block';
-  document.getElementById('montagem-area').style.display = 'none';
-  document.getElementById('formaextra-area').style.display = 'none';
-  document.getElementById('personalizacao-area').style.display = 'none';
-  revelarSecao(fotoEl);
-}
-
-function selectFoto(el) {
-  selecao.comFoto = el.dataset.valor;
-  selecao.formaMontagem = '';
-  marcarSelecionado(el);
-  mostrarMontagemArea();
-}
-
-function mostrarMontagemArea() {
-  const html = `
-    <div class="option" data-valor="linha" onclick="selectMontagem(this)">
-      <div class="option-media">🧵</div>
-      <span>Linha</span>
-    </div>
-    <div class="option" data-valor="arame" onclick="selectMontagem(this)">
-      <div class="option-media">🔗</div>
-      <span>Arame</span>
-    </div>`;
-  document.getElementById('montagem-opcoes').innerHTML = html;
-
-  const montagemEl = document.getElementById('montagem-area');
-  montagemEl.style.display = 'block';
-  document.getElementById('personalizacao-area').style.display = 'none';
-  revelarSecao(montagemEl);
-}
-
-function selectMontagem(el) {
-  selecao.formaMontagem = el.dataset.valor;
-  marcarSelecionado(el);
-  mostrarFormaMontarExtraArea(selecao.tipo);
+  mostrarMisteriosNoivaArea();
 }
 
 function selectCorBase(el) {
@@ -1701,81 +1645,6 @@ function selectFormaMontarExtra(el) {
 }
 
 /* =============================================
-   RELICÁRIO (Terço de Noiva)
-   ============================================= */
-function mostrarRelicarioArea() {
-  const html = `
-    <div class="option" data-valor="com" onclick="selectRelicarioOpcao(this)">
-      <div class="option-media">📿</div>
-      <span>Com relicário</span>
-    </div>
-    <div class="option" data-valor="sem" onclick="selectRelicarioOpcao(this)">
-      <div class="option-media">🚫</div>
-      <span>Sem relicário</span>
-    </div>`;
-  document.getElementById('relicario-opcoes').innerHTML = html;
-  document.getElementById('label-relicario').textContent = 'Deseja relicário?';
-
-  const el = document.getElementById('relicario-area');
-  el.style.display = 'block';
-  document.getElementById('misterios-area').style.display = 'none';
-  document.getElementById('foto-area').style.display = 'none';
-  document.getElementById('montagem-area').style.display = 'none';
-  document.getElementById('formaextra-area').style.display = 'none';
-  document.getElementById('personalizacao-area').style.display = 'none';
-  revelarSecao(el);
-}
-
-function selectRelicarioOpcao(el) {
-  selecao.relicarioOpcao = el.dataset.valor;
-  selecao.relicarioModelo = selecao.relicarioAcabamento = '';
-  precoRelicario = 0;
-  recalcularTotal();
-  marcarSelecionado(el);
-
-  if (selecao.relicarioOpcao === 'sem') {
-    mostrarMisteriosNoivaArea();
-    return;
-  }
-
-  let html = '';
-  relicariosNoiva.forEach(r => {
-    html += `
-      <div class="option" data-nome="${r.nome}" data-preco="${r.preco}" onclick="selectRelicarioModelo(this)">
-        ${renderMedia(r)}
-        <span>${r.nome}</span>
-        <span class="price">R$ ${r.preco},00</span>
-      </div>`;
-  });
-  document.getElementById('relicario-opcoes').innerHTML = html;
-  document.getElementById('label-relicario').textContent = 'Escolha o relicário';
-}
-
-function selectRelicarioModelo(el) {
-  selecao.relicarioModelo = el.dataset.nome;
-  precoRelicario = Number(el.dataset.preco);
-  recalcularTotal();
-  marcarSelecionado(el);
-
-  let html = '';
-  acabamentosRelicarioNoiva.forEach(a => {
-    html += `
-      <div class="option" data-valor="${a.valor}" onclick="selectRelicarioAcabamento(this)">
-        <div class="option-media" style="font-size:28px">${a.emoji}</div>
-        <span>${a.nome}</span>
-      </div>`;
-  });
-  document.getElementById('relicario-opcoes').innerHTML = html;
-  document.getElementById('label-relicario').textContent = 'Acabamento do relicário';
-}
-
-function selectRelicarioAcabamento(el) {
-  selecao.relicarioAcabamento = el.dataset.valor;
-  marcarSelecionado(el);
-  mostrarMisteriosNoivaArea();
-}
-
-/* =============================================
    MISTÉRIOS (Terço de Noiva)
    ============================================= */
 function mostrarMisteriosNoivaArea() {
@@ -1793,8 +1662,7 @@ function mostrarMisteriosNoivaArea() {
 
   const el = document.getElementById('misterios-area');
   el.style.display = 'block';
-  document.getElementById('foto-area').style.display = 'none';
-  document.getElementById('montagem-area').style.display = 'none';
+  document.getElementById('relicario-area').style.display = 'none';
   document.getElementById('formaextra-area').style.display = 'none';
   document.getElementById('personalizacao-area').style.display = 'none';
   revelarSecao(el);
@@ -1803,9 +1671,87 @@ function mostrarMisteriosNoivaArea() {
 function selectMisterioNoiva(el) {
   selecao.misterio = el.dataset.nome;
   precoMisterio    = Number(el.dataset.preco);
+  selecao.relicarioOpcao = selecao.relicarioModelo = selecao.relicarioAcabamento = '';
+  precoRelicario = 0;
   recalcularTotal();
   marcarSelecionado(el);
-  mostrarFotoArea();
+  mostrarRelicarioArea();
+}
+
+/* =============================================
+   RELICÁRIO (Terço de Noiva)
+   ============================================= */
+function mostrarRelicarioArea() {
+  const html = `
+    <div class="option" data-valor="com" onclick="selectRelicarioOpcao(this)">
+      <div class="option-media">📿</div>
+      <span>Com relicário</span>
+    </div>
+    <div class="option" data-valor="sem" onclick="selectRelicarioOpcao(this)">
+      <div class="option-media">🚫</div>
+      <span>Sem relicário</span>
+    </div>`;
+  document.getElementById('relicario-opcoes').innerHTML = html;
+  document.getElementById('label-relicario').textContent = 'Deseja relicário?';
+
+  const el = document.getElementById('relicario-area');
+  el.style.display = 'block';
+  document.getElementById('formaextra-area').style.display = 'none';
+  document.getElementById('personalizacao-area').style.display = 'none';
+  revelarSecao(el);
+}
+
+function selectRelicarioOpcao(el) {
+  selecao.relicarioOpcao = el.dataset.valor;
+  selecao.relicarioModelo = selecao.relicarioAcabamento = '';
+  precoRelicario = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+
+  if (selecao.relicarioOpcao === 'sem') {
+    mostrarFormaMontarExtraArea('noiva');
+    return;
+  }
+
+  let html = '';
+  acabamentosRelicarioNoiva.forEach(a => {
+    html += `
+      <div class="option" data-valor="${a.valor}" onclick="selectRelicarioAcabamento(this)">
+        <div class="option-media" style="font-size:28px">${a.emoji}</div>
+        <span>${a.nome}</span>
+      </div>`;
+  });
+  document.getElementById('relicario-opcoes').innerHTML = html;
+  document.getElementById('label-relicario').textContent = 'Tom do relicário';
+}
+
+function selectRelicarioAcabamento(el) {
+  selecao.relicarioAcabamento = el.dataset.valor;
+  selecao.relicarioModelo = '';
+  precoRelicario = 0;
+  recalcularTotal();
+  marcarSelecionado(el);
+
+  const modelos = relicariosNoivaPorTom[selecao.relicarioAcabamento] || [];
+  let html = '';
+  modelos.forEach(r => {
+    html += `
+      <div class="option" data-nome="${r.nome}" data-preco="${r.preco}" onclick="selectRelicarioModelo(this)">
+        ${renderMedia(r)}
+        <span>${r.nome}</span>
+        <span class="price">R$ ${r.preco},00</span>
+      </div>`;
+  });
+  document.getElementById('relicario-opcoes').innerHTML = html;
+  document.getElementById('label-relicario').textContent = 'Modelo do relicário';
+}
+
+function selectRelicarioModelo(el) {
+  selecao.relicarioModelo = el.dataset.nome;
+  precoRelicario = Number(el.dataset.preco);
+  recalcularTotal();
+  marcarSelecionado(el);
+  mostrarFormaMontarExtraArea('noiva');
 }
 
 /* =============================================
@@ -1864,8 +1810,6 @@ function mostrarPersonalizacao(tipo) {
     revelarSecao(area);
 
   } else if (tipo === 'noiva') {
-    const resumoFoto      = selecao.comFoto === 'com-foto' ? '📸 Com foto' : '🚫 Sem foto';
-    const resumoMontagem  = selecao.formaMontagem === 'linha' ? '🧵 Linha' : '🔗 Arame';
     const resumoRelicario = selecao.relicarioOpcao === 'com'
       ? `📿 ${escapeHtml(selecao.relicarioModelo)}${selecao.relicarioAcabamento ? ' (' + (selecao.relicarioAcabamento === 'prata' ? 'Prata' : 'Dourado') + ')' : ''}`
       : '🚫 Sem relicário';
@@ -1875,26 +1819,23 @@ function mostrarPersonalizacao(tipo) {
       <div style="background:#fffbe8;border:1px solid #ffd966;border-radius:10px;padding:12px;margin-bottom:12px;font-size:12px;color:#888;line-height:1.8;">
         <strong style="color:#b8860b;">Resumo das escolhas:</strong><br>
         Cor: <strong style="color:#444;">${escapeHtml(selecao.cor)}</strong><br>
-        Relicário: <strong style="color:#444;">${resumoRelicario}</strong><br>
         Mistério: <strong style="color:#444;">${escapeHtml(selecao.misterio) || '—'}</strong><br>
-        Foto: <strong style="color:#444;">${resumoFoto}</strong><br>
-        Montagem: <strong style="color:#444;">${resumoMontagem}</strong><br>
+        Relicário: <strong style="color:#444;">${resumoRelicario}</strong><br>
         Forma de montar: <strong style="color:#444;">${resumoFormaExtra}</strong>
       </div>
       <div class="campo-texto">
-        <label>Nome do casal ou mensagem (opcional)</label>
+        <label>Nome do Casal</label>
         <input type="text" placeholder="Ex: Ana & João — 15/06/2025"
           value="${escapeHtml(selecao.personalizacao.texto)}"
           oninput="selecao.personalizacao.texto = this.value">
       </div>
-      ${selecao.comFoto === 'com-foto' ? `
       <div class="campo-upload" style="margin-top:10px;">
-        <label>Enviar foto</label>
+        <label>📸 Enviar foto (opcional)</label>
         <input type="file" accept="image/*" onchange="handleFotoUpload(this)">
         <span id="foto-nome" style="font-size:11px;color:#bbb;margin-top:4px;display:block;">
           ${escapeHtml(selecao.personalizacao.fotoNome) || 'Nenhum arquivo selecionado'}
         </span>
-      </div>` : ''}`;
+      </div>`;
     area.style.display = 'block';
     revelarSecao(area);
 
@@ -1986,28 +1927,20 @@ function finalizar() {
         mostrarPopupErro('Campo obrigatório', 'Escolha a cor das contas.');
         return;
       }
-      if (!selecao.relicarioOpcao) {
-        mostrarPopupErro('Campo obrigatório', 'Escolha: com relicário ou sem relicário.');
-        return;
-      }
-      if (selecao.relicarioOpcao === 'com' && !selecao.relicarioModelo) {
-        mostrarPopupErro('Campo obrigatório', 'Escolha o modelo do relicário.');
-        return;
-      }
-      if (selecao.relicarioOpcao === 'com' && !selecao.relicarioAcabamento) {
-        mostrarPopupErro('Campo obrigatório', 'Escolha o acabamento do relicário: Prata ou Dourado.');
-        return;
-      }
       if (!selecao.misterio) {
         mostrarPopupErro('Campo obrigatório', 'Escolha um mistério.');
         return;
       }
-      if (!selecao.comFoto) {
-        mostrarPopupErro('Campo obrigatório', 'Escolha: com foto ou sem foto.');
+      if (!selecao.relicarioOpcao) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha: com relicário ou sem relicário.');
         return;
       }
-      if (!selecao.formaMontagem) {
-        mostrarPopupErro('Campo obrigatório', 'Escolha a forma de montar: Linha ou Arame.');
+      if (selecao.relicarioOpcao === 'com' && !selecao.relicarioAcabamento) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha o tom do relicário: Prata ou Dourado.');
+        return;
+      }
+      if (selecao.relicarioOpcao === 'com' && !selecao.relicarioModelo) {
+        mostrarPopupErro('Campo obrigatório', 'Escolha o modelo do relicário.');
         return;
       }
       if (!selecao.formaMontagemExtra) {
@@ -2067,8 +2000,6 @@ function finalizar() {
     modelo:             selecao.modelo,
     cor:                selecao.cor                || '',
     misterio:           selecao.misterio           || '',
-    comFoto:            selecao.comFoto            || '',
-    formaMontagem:      selecao.formaMontagem      || '',
     cruz:               selecao.cruz               || '',
     relicarioOpcao:     selecao.relicarioOpcao      || '',
     relicarioModelo:    selecao.relicarioModelo     || '',
@@ -2104,10 +2035,10 @@ function mostrarPopupSucesso() {
 }
 function fecharPopup() {
   document.getElementById('popup-overlay').classList.remove('ativo');
-  selecao = { tipo:'', categoria:'', modelo:'', corBase:'', cor:'', misterioCat:'', misterio:'', comFoto:'', formaMontagem:'', cruz:'', relicarioOpcao:'', relicarioModelo:'', relicarioAcabamento:'', formaMontagemExtra:'', personalizacao:{ nomes: [''] } };
+  selecao = { tipo:'', categoria:'', modelo:'', corBase:'', cor:'', misterioCat:'', misterio:'', cruz:'', relicarioOpcao:'', relicarioModelo:'', relicarioAcabamento:'', formaMontagemExtra:'', personalizacao:{ nomes: [''] } };
   precoModelo = precoCor = precoMisterio = precoNomes = precoCruz = precoRelicario = 0;
   recalcularTotal();
-  ['categorias-area','modelos-area','cores-area','misterios-area','cruz-area','relicario-area','foto-area','montagem-area','formaextra-area','personalizacao-area'].forEach(id =>
+  ['categorias-area','modelos-area','cores-area','misterios-area','cruz-area','relicario-area','formaextra-area','personalizacao-area'].forEach(id =>
     document.getElementById(id).style.display = 'none'
   );
   document.querySelectorAll('.option, .tipo-card').forEach(o => o.classList.remove('selected'));
