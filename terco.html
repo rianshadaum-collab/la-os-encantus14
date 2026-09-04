@@ -188,6 +188,79 @@ nav a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; 
   mix-blend-mode: multiply;
   pointer-events: none;
 }
+/* Botão de lupa sobre fotos reais, para abrir o popup de imagem ampliada */
+.btn-zoom {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.9);
+  color: #555;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: 0.15s;
+}
+.btn-zoom:hover { background: #fff; color: #ff4da6; transform: scale(1.08); }
+
+/* Popup de imagem ampliada */
+#popup-imagem-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#popup-imagem-overlay.ativo { display: flex; }
+#popup-imagem-caixa {
+  position: relative;
+  max-width: 480px;
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 12px 50px rgba(0,0,0,0.3);
+  animation: popIn 0.2s ease;
+}
+#popup-imagem-img {
+  width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fff5fb, #fffbe8);
+  display: block;
+}
+#popup-imagem-nome {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #444;
+  font-weight: 600;
+}
+.popup-imagem-fechar {
+  position: absolute;
+  top: -14px; right: -14px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #555;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
 
 .option.selected { border: 2px solid #d4af37; background: #fffbeb; }
 
@@ -690,6 +763,15 @@ nav a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; 
   </div>
 </div>
 
+<!-- Popup imagem ampliada -->
+<div id="popup-imagem-overlay">
+  <div id="popup-imagem-caixa">
+    <button type="button" class="popup-imagem-fechar" onclick="fecharImagem()">×</button>
+    <img id="popup-imagem-img" src="" alt="">
+    <p id="popup-imagem-nome"></p>
+  </div>
+</div>
+
 <script>
 
 /* =============================================
@@ -796,6 +878,8 @@ function renderMedia(item) {
       <div class="option-media tem-foto">
         <img src="${item.img}" alt="${item.nome}"
           onerror="this.parentElement.classList.remove('tem-foto'); this.parentElement.innerHTML='<span>${item.emoji || '📿'}</span>'">
+        <button type="button" class="btn-zoom" data-img="${item.img}" data-nome="${escapeHtml(item.nome)}"
+          onclick="event.stopPropagation(); abrirImagemEl(this)" title="Ver imagem ampliada">🔍</button>
       </div>`;
   }
   return `<div class="option-media">${item.emoji || '📿'}</div>`;
@@ -2053,11 +2137,28 @@ function fecharPopupErro() {
   document.getElementById('popup-erro-overlay').classList.remove('ativo');
 }
 
+function abrirImagem(url, nome) {
+  if (!url) return;
+  document.getElementById('popup-imagem-img').src = url;
+  document.getElementById('popup-imagem-img').alt = nome || '';
+  document.getElementById('popup-imagem-nome').textContent = nome || '';
+  document.getElementById('popup-imagem-overlay').classList.add('ativo');
+}
+function abrirImagemEl(el) {
+  abrirImagem(el.dataset.img, el.dataset.nome);
+}
+function fecharImagem() {
+  document.getElementById('popup-imagem-overlay').classList.remove('ativo');
+}
+
 document.getElementById('popup-overlay').addEventListener('click', function(e) {
   if (e.target === this) fecharPopup();
 });
 document.getElementById('popup-erro-overlay').addEventListener('click', function(e) {
   if (e.target === this) fecharPopupErro();
+});
+document.getElementById('popup-imagem-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharImagem();
 });
 
 atualizarProgresso();
